@@ -24,6 +24,7 @@ interface SlideData {
     | "france-pillars"
     | "france-sanctions"
     | "france-vs-iesf"
+    | "korea-roles"
     | "table"
     | "analysis"
     | "refs";
@@ -104,62 +105,60 @@ const slides: SlideData[] = [
     layout: "metrics",
   },
 
-  // 4. БНСУ: Холбоо ба Хууль
+  // 4. БНСУ: KIChE танилцуулга
   {
     name: "Өмнөд Солонгос",
-    tag: "БНСУ · Холбоо ба Эрх зүй",
-    titleHtml: `Төрийн яамны ${mark("хатуу хяналттай")} тогтолцоо`,
-    sub: "БНСУ-д инженерийн мэргэжил нь төрийн тусгай хуулиар зохицуулагддаг хатуу сахилгатай.",
+    tag: "БНСУ · KIChE · Химийн инженерчлэлийн холбоо",
+    titleHtml: `Солонгосын ${mark("KIChE")} нийгэмлэг`,
+    sub: "The Korean Institute of Chemical Engineers — БНСУ-ын химийн инженерчлэлийн мэргэжлийн холбоо.",
     points: [
       {
-        bold: "KPEA (한국기술사회) · 1965 он:",
-        text: "Шинжлэх ухаан, МХХТ-ийн яамны (MSIT) хяналтад ажилладаг нэгдэл",
+        bold: "Байгуулагдсан:",
+        text: "1962 оны 10 дугаар сарын 8-нд байгуулагдсан",
         ref: "[1]",
       },
       {
-        bold: "Удирдах зөвлөлийн бүтэц:",
-        text: "Сонгуульт ТУЗ нь төрийн техникийн бодлогод шууд зөвлөх үүрэгтэй.",
+        bold: "Ерөнхийлөгч:",
+        text: "Park Jong Myun",
+        ref: "[1]",
       },
       {
-        bold: "Хуульчилсан үүрэг (Mandatory):",
-        text: "'기술사법' (Мэргэжлийн инженерүүдийн хууль)-аар дүрмийг заавал мөрдүүлдэг",
+        bold: "Гишүүд:",
+        text: "Одоогийн гишүүд 6000 гаруй",
         ref: "[1]",
       },
     ],
     layout: "photo",
     imageSrc: "/images/korea.jpg",
     imageAlt: "Сөүл хотын шөнийн дүр төрх",
-    imageBadge: "SOUTH KOREA · KPEA / MSIT",
+    imageBadge: "SOUTH KOREA · KIChE · 1962",
     imageSource: "Seoul Skyline · Wikimedia Commons [14]",
   },
 
-  // 5. БНСУ: 6 зарчим ба Санкц
+  // 5. БНСУ: KIChE ажиллах арга ба чиг үүрэг
   {
-    name: "Солонгосын ёс зүй",
-    tag: "БНСУ · 6 зарчим ба Сахилга",
-    titleHtml: `Нийтийн аюулгүй байдал ба ${mark("тамгалах хариуцлага")}`,
-    sub: "Солонгосын мэргэшсэн инженер (기술사) төсөлд биечлэн тамга дарж хувийн хариуцлага хүлээнэ.",
+    name: "KIChE чиг үүрэг",
+    tag: "БНСУ · KIChE · Ажиллах арга ба чиг үүрэг",
+    titleHtml: `Тус нийгэмлэг ${mark("хэрхэн ажилладаг")} вэ?`,
+    sub: "Судалгаа, инновац, мэргэшүүлэлт, олон улсын хамтын ажиллагаагаар салбарын хөгжилд хувь нэмэр оруулдаг.",
     points: [
       {
-        bold: "Нийтийн аюулгүй байдал:",
-        text: "Хүн амын амь нас, эрүүл мэндийг хамгаалах нь үндсэн дээд зарчим",
+        bold: "Судалгааг үйлдвэрлэлд:",
+        text: "Судалгааны шинэ үр дүнг үйлдвэрлэлд нэвтрүүлнэ",
         ref: "[1]",
       },
       {
-        bold: "Биечлэн тамгалах үүрэг:",
-        text: "Тооцоололд биечлэн тамга дарна; тамгаа бусдад шилжүүлэхийг хатуу хориглоно.",
+        bold: "Инженерүүдийн чадвар:",
+        text: "Инженерүүдийн мэдлэг чадварыг дээшлүүлнэ",
+        ref: "[1]",
       },
       {
-        bold: "Хатуу шийтгэл (Лиценз цуцлах):",
-        text: "Ноцтой зөрчилд мэргэжлийн лицензийг 1-3 жилээр хасах эсвэл бүрэн цуцална",
+        bold: "Салбарын хөгжил:",
+        text: "Химийн инженерчлэлийн салбарын хөгжил, олон улсын хамтын ажиллагааг дэмжинэ",
         ref: "[1]",
       },
     ],
-    layout: "photo",
-    imageSrc: "/images/chemical-plant.jpg",
-    imageAlt: "Нефть-химийн үйлдвэрлэл",
-    imageBadge: "БНСУ · ТАМГАЛАХ ҮҮРЭГ",
-    imageSource: "Petrochemical facility · Wikimedia Commons",
+    layout: "korea-roles",
   },
 
   // 6. Франц: UNAFIC холбоо ба Удирдах зөвлөл
@@ -377,12 +376,12 @@ const slides: SlideData[] = [
       },
       {
         bold: "Дүрмийн статусын ялгаа:",
-        text: "Канад, Солонгост хуулиар заавал мөрддөг; Францад Charte ISR нь сайн дурынх",
+        text: "Канадад хуулиар заавал; Францад Charte ISR сайн дурын; Солонгосын KIChE нь мэргэжлийн хөгжлийн нийгэмлэг",
         ref: "[1-3]",
       },
       {
         bold: "Санкцын тогтолцооны ялгаа:",
-        text: "Канад, Солонгост лиценз цуцалдаг; Францад Эрүүгийн 121-3-аар шүүх шийтгэнэ",
+        text: "Канадад лиценз цуцалдаг; Францад Эрүүгийн 121-3-аар шүүх шийтгэнэ",
         ref: "[5]",
       },
     ],
@@ -398,8 +397,8 @@ const slides: SlideData[] = [
     points: [
       {
         bold: "1. Ёс зүйг хуульчлах:",
-        text: "Инженерийн ёс зүйг мэргэшсэн зэрэг, тамгатай шууд уях (Солонгос, Канад загвар)",
-        ref: "[1][4]",
+        text: "Инженерийн ёс зүйг мэргэшсэн зэрэг, тамгатай шууд уях (Канад загвар)",
+        ref: "[4]",
       },
       {
         bold: "2. Шүгэл үлээгчийг хамгаалах:",
@@ -420,7 +419,7 @@ const slides: SlideData[] = [
     name: "Эх сурвалжууд",
     tag: "Албан ёсны эх баримтууд",
     titleHtml: `Баталгаат анхдагч ${mark("эх сурвалжууд")}`,
-    sub: "UNAFIC дүрэм, IESF Charte ISR, Францын Эрүүгийн хууль 121-3, KPEA, EGBC зэрэг үндсэн холбоосууд.",
+    sub: "UNAFIC дүрэм, IESF Charte ISR, Францын Эрүүгийн хууль 121-3, KIChE, EGBC зэрэг үндсэн холбоосууд.",
     layout: "refs",
   },
 ];
@@ -428,8 +427,9 @@ const slides: SlideData[] = [
 const referencesList = [
   {
     id: "[1]",
-    title: "Korea Professional Engineers Act (기술사법) & KPEA Ethics Code",
-    url: "https://www.law.go.kr",
+    title:
+      "The Korean Institute of Chemical Engineers (KIChE) — Албан ёсны танилцуулга",
+    url: "https://www.kiche.or.kr",
   },
   {
     id: "[2]",
@@ -905,7 +905,7 @@ export default function Home() {
                           <td>
                             <b>Үндэсний байгууллага</b>
                           </td>
-                          <td>KPEA (1965 он) [1]</td>
+                          <td>KIChE (1962 он) [1]</td>
                           <td>UNAFIC (1910) / IESF [2][3]</td>
                           <td>Engineers Canada (1936) [4]</td>
                         </tr>
@@ -913,7 +913,9 @@ export default function Home() {
                           <td>
                             <b>Удирдлагын бүтэц</b>
                           </td>
-                          <td>Яамны хяналттай сонгуульт ТУЗ [1]</td>
+                          <td>
+                            Ерөнхийлөгч тэргүүтэй, 6000+ гишүүнтэй нийгэмлэг [1]
+                          </td>
                           <td>Холбооны зөвлөл & Удирдах баг [2]</td>
                           <td>Олон нийтийн төлөөлөлтэй ТУЗ [4]</td>
                         </tr>
@@ -921,7 +923,10 @@ export default function Home() {
                           <td>
                             <b>Дүрмийн статус</b>
                           </td>
-                          <td>Хуулиар заавал мөрдөх (기술사법) [1]</td>
+                          <td>
+                            Мэргэжлийн нийгэмлэг: судалгаа, мэргэшүүлэх чиглэл
+                            [1]
+                          </td>
                           <td>Сайн дурын (Charte ISR) [3]</td>
                           <td>Мужийн хуулиар заавал мөрдөх [4][8]</td>
                         </tr>
@@ -929,7 +934,7 @@ export default function Home() {
                           <td>
                             <b>Сахилга, санкц</b>
                           </td>
-                          <td>Лиценз 1-3 жилээр хасах эсвэл цуцлах [1]</td>
+                          <td>Эх сурвалжид дурдаагүй</td>
                           <td>Эрүүгийн хуулийн 121-3 дугаар зүйл [5]</td>
                           <td>$100,000 хүртэл торгууль, лиценз цуцлах [4]</td>
                         </tr>
@@ -937,7 +942,7 @@ export default function Home() {
                           <td>
                             <b>Эрсдэл мэдээлэх үүрэг</b>
                           </td>
-                          <td>Нийтийн аюулгүй байдлыг дээдлэх зарчим [1]</td>
+                          <td>Эх сурвалжид дурдаагүй</td>
                           <td>Эрсдэлийг үнэн зөв мэдээлэх зарчим [3]</td>
                           <td>Duty to Report — заавал [4]</td>
                         </tr>
@@ -981,6 +986,48 @@ export default function Home() {
                       {s.imageSource && (
                         <div className="photo-source">{s.imageSource}</div>
                       )}
+                    </div>
+                  ) : s.layout === "korea-roles" ? (
+                    /* KIChE чиг үүрэг */
+                    <div className="paper-card-stack">
+                      <div className="paper-card">
+                        <div className="card-top">
+                          <span className="card-title">
+                            1. Судалгаа, инновацыг дэмжих
+                          </span>
+                          <span className="card-pill">СУДАЛГАА</span>
+                        </div>
+                        <p className="card-desc">
+                          Судалгааны шинэ үр дүнг үйлдвэрлэлд нэвтрүүлж,
+                          инновацыг дэмждэг [1].
+                        </p>
+                      </div>
+
+                      <div className="paper-card">
+                        <div className="card-top">
+                          <span className="card-title">
+                            2. Инженерүүдийг мэргэшүүлэх
+                          </span>
+                          <span className="card-pill">МЭРГЭШИЛ</span>
+                        </div>
+                        <p className="card-desc">
+                          Инженерүүдийн мэдлэг, чадварыг дээшлүүлнэ [1].
+                        </p>
+                      </div>
+
+                      <div className="paper-card">
+                        <div className="card-top">
+                          <span className="card-title">
+                            3. Олон улсын хамтын ажиллагаа
+                          </span>
+                          <span className="card-pill">ОЛОН УЛС</span>
+                        </div>
+                        <p className="card-desc">
+                          Олон улсын хамтын ажиллагааг хөгжүүлж, БНСУ-ын химийн
+                          инженерчлэлийн салбарын хөгжилд хувь нэмэр оруулдаг
+                          [1].
+                        </p>
+                      </div>
                     </div>
                   ) : s.layout === "france-gov" ? (
                     /* French Governance: Conseil Fédéral & Bureau */
@@ -1175,11 +1222,13 @@ export default function Home() {
                           <span className="card-title">
                             БНСУ (Өмнөд Солонгос)
                           </span>
-                          <span className="card-pill">ТӨРИЙН САХИЛГА</span>
+                          <span className="card-pill">
+                            МЭРГЭЖЛИЙН НИЙГЭМЛЭГ
+                          </span>
                         </div>
                         <p className="card-desc">
-                          Шинжлэх ухааны яамны шууд хяналт; биечлэн тамгалах
-                          хуулийн хатуу үүрэгтэй [1].
+                          KIChE нь судалгаа, инновац, инженерүүдийг мэргэшүүлэх,
+                          олон улсын хамтын ажиллагааг дэмждэг [1].
                         </p>
                       </div>
                       <div className="paper-card">
