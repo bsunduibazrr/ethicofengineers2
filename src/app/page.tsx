@@ -25,6 +25,9 @@ interface SlideData {
     | "france-sanctions"
     | "france-vs-iesf"
     | "korea-roles"
+    | "korea-docs"
+    | "korea-principles"
+    | "korea-sanctions"
     | "table"
     | "analysis"
     | "refs";
@@ -99,7 +102,7 @@ const slides: SlideData[] = [
       {
         bold: "100% бодит эх сурвалж:",
         text: "Зохиомол тоо баримтгүй, заалт бүрийг баталгаат эх сурвалжтай уяв",
-        ref: "[1-15]",
+        ref: "[1-16]",
       },
     ],
     layout: "metrics",
@@ -159,6 +162,33 @@ const slides: SlideData[] = [
       },
     ],
     layout: "korea-roles",
+  },
+
+  // 5.1 БНСУ: Ёс зүйн хоёр баримт бичиг
+  {
+    name: "Ёс зүйн баримтууд",
+    tag: "БНСУ · Ёс зүйн дүрэм",
+    titleHtml: `Химийн инженерчлэлийн ${mark("ёс зүйн баримт")} бичгүүд`,
+    sub: "Химийн инженерчлэлийн чиглэлээр дараах хоёр байгууллагын баримт бичгийг ялгаж үзэх хэрэгтэй [1][16].",
+    layout: "korea-docs",
+  },
+
+  // 5.2 БНСУ: Ёс зүйн 6 зарчим
+  {
+    name: "Ёс зүйн зарчим",
+    tag: "БНСУ · Ёс зүйн дүрмийн үндсэн зарчим",
+    titleHtml: `Ёс зүйн дүрмийн ${mark("6 зарчим")}`,
+    sub: "Хоёр нийгэмлэгийн ёс зүйн дүрмийн үндсэн зарчим, агуулга [1][16].",
+    layout: "korea-principles",
+  },
+
+  // 5.3 БНСУ: Хүлээлгэх хариуцлага
+  {
+    name: "Хариуцлагын төрөл",
+    tag: "БНСУ · Хариуцлага ба сахилга",
+    titleHtml: `Хүлээлгэх ${mark("хариуцлагын төрлүүд")}`,
+    sub: "Ёс зүйн дүрэм зөрчсөн тохиолдолд хүлээлгэх хариуцлагын төрлүүд [1][16].",
+    layout: "korea-sanctions",
   },
 
   // 6. Франц: UNAFIC холбоо ба Удирдах зөвлөл
@@ -381,7 +411,7 @@ const slides: SlideData[] = [
       },
       {
         bold: "Санкцын тогтолцооны ялгаа:",
-        text: "Канадад лиценз цуцалдаг; Францад Эрүүгийн 121-3-аар шүүх шийтгэнэ",
+        text: "Солонгост нийгэмлэгийн сахилга, Канадад лиценз цуцлах; Францад Эрүүгийн 121-3-аар шүүх шийтгэнэ",
         ref: "[5]",
       },
     ],
@@ -419,7 +449,7 @@ const slides: SlideData[] = [
     name: "Эх сурвалжууд",
     tag: "Албан ёсны эх баримтууд",
     titleHtml: `Баталгаат анхдагч ${mark("эх сурвалжууд")}`,
-    sub: "UNAFIC дүрэм, IESF Charte ISR, Францын Эрүүгийн хууль 121-3, KIChE, EGBC зэрэг үндсэн холбоосууд.",
+    sub: "UNAFIC дүрэм, IESF Charte ISR, Францын Эрүүгийн хууль 121-3, KIChE, KSIEC, EGBC зэрэг үндсэн холбоосууд.",
     layout: "refs",
   },
 ];
@@ -503,6 +533,28 @@ const referencesList = [
     title: "Maison de la Chimie, Paris — French Chemistry Headquarters",
     url: "https://commons.wikimedia.org",
   },
+  {
+    id: "[16]",
+    title:
+      "KSIEC — The Korean Society of Industrial and Engineering Chemistry, Ёс зүйн дүрэм",
+    url: "https://www.ksiec.or.kr",
+  },
+];
+
+const koreaPrinciples = [
+  "Мэргэжлийн хариуцлага",
+  "Нууц хадгалах",
+  "Шударга байдал",
+  "Оюуны өмчийг хүндэтгэх",
+  "Шударга үнэлгээ",
+  "Байгаль орчны хамгаалал",
+];
+
+const koreaSanctions = [
+  "Анхааруулга",
+  "Өгүүлэл нийтлэхийг хориглох",
+  "Өгүүлэл буцаан татах",
+  "Гишүүнчлэл түдгэлзүүлэх",
 ];
 
 const slideStates: SlideState[] = [
@@ -516,6 +568,12 @@ const slideStates: SlideState[] = [
   { x: 0.84, y: 0.56, s: 0.34, rx: 0.35, rz: -0.22, o: 0.65 },
   // 4. БНСУ: 6 зарчим (Photo)
   { x: 0.86, y: 0.58, s: 0.32, rx: -0.28, rz: 0.32, o: 0.65 },
+  // 4.1 БНСУ: Ёс зүйн баримтууд
+  { x: 0.84, y: 0.56, s: 0.33, rx: 0.3, rz: -0.2, o: 0.65 },
+  // 4.2 БНСУ: Ёс зүйн зарчим
+  { x: 0.85, y: 0.55, s: 0.32, rx: -0.25, rz: 0.25, o: 0.65 },
+  // 4.3 БНСУ: Хариуцлагын төрөл
+  { x: 0.86, y: 0.57, s: 0.32, rx: 0.2, rz: 0.3, o: 0.65 },
   // 5. Франц: UNAFIC ТУЗ (france-gov)
   { x: 0.82, y: 0.52, s: 0.36, rx: 0.25, rz: 0.2, o: 0.7 },
   // 6. Франц: Чиг үүрэг (Photo)
@@ -579,6 +637,10 @@ html,body{height:100%;overflow:hidden}
 .card-title{font-weight:600;font-size:clamp(13px,2.1vh,19px)}
 .card-pill{font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;background:rgba(20,40,34,.1);white-space:nowrap}
 .card-desc{margin:0;font-size:clamp(12px,1.9vh,17px);line-height:1.4}
+.principle-grid{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:1.6vh 14px}
+.principle-tile{padding:2vh 16px;border-radius:12px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;gap:.8vh}
+.principle-num{font-size:clamp(12px,1.8vh,16px);opacity:.6;letter-spacing:.08em}
+.principle-name{font-weight:600;font-size:clamp(14px,2.4vh,22px);line-height:1.2}
 .metrics-row{width:100%;display:grid;gap:1.6vh}
 .metric-card{padding:2vh 18px;border-radius:12px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.08)}
 .metric-num{font-size:clamp(32px,7vh,64px);line-height:1}
@@ -827,7 +889,7 @@ export default function Home() {
       {/* INK CURTAIN TRANSITION */}
       <div className="curtain" ref={curtainRef} aria-hidden="true">
         <div className="cc" ref={curtainCountRef}>
-          01 / 16
+          01 / 19
         </div>
         <div className="cn" ref={curtainNameRef}>
           <span>Нүүр</span>
@@ -923,10 +985,7 @@ export default function Home() {
                           <td>
                             <b>Дүрмийн статус</b>
                           </td>
-                          <td>
-                            Мэргэжлийн нийгэмлэг: судалгаа, мэргэшүүлэх чиглэл
-                            [1]
-                          </td>
+                          <td>Нийгэмлэгийн ёс зүйн удирдамж, тунхаг [1][16]</td>
                           <td>Сайн дурын (Charte ISR) [3]</td>
                           <td>Мужийн хуулиар заавал мөрдөх [4][8]</td>
                         </tr>
@@ -934,7 +993,10 @@ export default function Home() {
                           <td>
                             <b>Сахилга, санкц</b>
                           </td>
-                          <td>Эх сурвалжид дурдаагүй</td>
+                          <td>
+                            Анхааруулга, нийтлэхийг хориглох, буцаан татах,
+                            гишүүнчлэл түдгэлзүүлэх [1][16]
+                          </td>
                           <td>Эрүүгийн хуулийн 121-3 дугаар зүйл [5]</td>
                           <td>$100,000 хүртэл торгууль, лиценз цуцлах [4]</td>
                         </tr>
@@ -942,7 +1004,10 @@ export default function Home() {
                           <td>
                             <b>Эрсдэл мэдээлэх үүрэг</b>
                           </td>
-                          <td>Эх сурвалжид дурдаагүй</td>
+                          <td>
+                            Мэргэжлийн хариуцлага, байгаль орчны хамгаалал
+                            зарчим [1][16]
+                          </td>
                           <td>Эрсдэлийг үнэн зөв мэдээлэх зарчим [3]</td>
                           <td>Duty to Report — заавал [4]</td>
                         </tr>
@@ -1028,6 +1093,57 @@ export default function Home() {
                           [1].
                         </p>
                       </div>
+                    </div>
+                  ) : s.layout === "korea-docs" ? (
+                    <div className="paper-card-stack">
+                      <div className="paper-card">
+                        <div className="card-top">
+                          <span className="card-title">
+                            БНСУ-ын Химийн инженерүүдийн нийгэмлэг
+                            (한국화학공학회)
+                          </span>
+                          <span className="card-pill">2008.09.11</span>
+                        </div>
+                        <p className="card-desc">
+                          Эрдэм шинжилгээний сэтгүүл хэвлэлийн ёс зүйн удирдамж
+                          (09, 10, 16, 17, 20 онуудад шинэчлэн засварласан) [1].
+                        </p>
+                      </div>
+
+                      <div className="paper-card">
+                        <div className="card-top">
+                          <span className="card-title">
+                            БНСУ-ын Үйлдвэрлэлийн ба инженерийн химийн нийгэмлэг
+                            (한국공업화학회)
+                          </span>
+                          <span className="card-pill">2007.10.08</span>
+                        </div>
+                        <p className="card-desc">
+                          Судалгааны ёс зүйн тунхаг [16].
+                        </p>
+                      </div>
+                    </div>
+                  ) : s.layout === "korea-principles" ? (
+                    <div className="principle-grid">
+                      {koreaPrinciples.map((name, i) => (
+                        <div className="principle-tile" key={name}>
+                          <span className="principle-num">0{i + 1}</span>
+                          <span className="principle-name">{name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : s.layout === "korea-sanctions" ? (
+                    <div className="paper-card-stack">
+                      {koreaSanctions.map((name, i) => (
+                        <div className="paper-card" key={name}>
+                          <div className="card-top">
+                            <span className="card-title">
+                              {i + 1}. {name}
+                            </span>
+                            <span className="card-pill">ХАРИУЦЛАГА</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : s.layout === "france-gov" ? (
                     /* French Governance: Conseil Fédéral & Bureau */
@@ -1227,8 +1343,9 @@ export default function Home() {
                           </span>
                         </div>
                         <p className="card-desc">
-                          KIChE нь судалгаа, инновац, инженерүүдийг мэргэшүүлэх,
-                          олон улсын хамтын ажиллагааг дэмждэг [1].
+                          Нийгэмлэгийн ёс зүйн удирдамж; анхааруулгаас
+                          гишүүнчлэл түдгэлзүүлэх хүртэл хариуцлага хүлээлгэнэ
+                          [1][16].
                         </p>
                       </div>
                       <div className="paper-card">
