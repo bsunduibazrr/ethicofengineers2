@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { initHourglass, SlideState } from "../hourglass";
 
 interface Point {
   bold: string;
@@ -221,6 +222,25 @@ const referencesList = [
   { id: "[13]", title: "Hazeltine Creek Remediation Records — Mount Polley Mining Corporation", url: "https://commons.wikimedia.org" },
 ];
 
+const slideStates: SlideState[] = [
+  // 0. Нүүр (Cover): Hero right space
+  { x: 0.68, y: 0.02, s: 1.05, rx: 0.16, rz: -0.15, o: 0.88 },
+  // 1. Маунт Полли сүйрэл 2014 (Photo layout): Photo right, hourglass upper right
+  { x: 0.84, y: 0.58, s: 0.32, rx: -0.32, rz: 0.28, o: 0.65 },
+  // 2. EGBC Сахилгын шийтгэл (Metrics layout): Left cards, right open
+  { x: 0.72, y: -0.04, s: 0.98, rx: 0.22, rz: -0.18, o: 0.85 },
+  // 3. Утилитаризм (Photo layout): Photo right, hourglass top right
+  { x: 0.84, y: 0.56, s: 0.34, rx: 0.35, rz: -0.22, o: 0.65 },
+  // 4. Деонтологи (Photo layout): Photo right, hourglass top right
+  { x: 0.86, y: 0.58, s: 0.32, rx: -0.28, rz: 0.32, o: 0.65 },
+  // 5. EGBC Дүрмээр шийдвэрлэх (Metrics layout): Left cards, right open
+  { x: 0.7, y: -0.02, s: 1.0, rx: 0.18, rz: -0.16, o: 0.85 },
+  // 6. Хэрэгжүүлэх 4 санал (Photo layout): Photo right, hourglass top right
+  { x: 0.84, y: 0.56, s: 0.32, rx: 0.3, rz: 0.18, o: 0.65 },
+  // 7. Эх сурвалжууд (Refs layout): Top right
+  { x: 0.85, y: 0.6, s: 0.3, rx: 0.18, rz: -0.2, o: 0.6 },
+];
+
 export default function Biydalt3() {
   const [index, setIndex] = useState(0);
   const [isBusy, setIsBusy] = useState(false);
@@ -233,60 +253,35 @@ export default function Biydalt3() {
   const progressRef = useRef<HTMLDivElement>(null);
   const slideContainerRef = useRef<HTMLDivElement>(null);
 
-  // THREE.JS BACKGROUND WIREFRAME
+  const hourglassRef = useRef<{ onChange: (d: number) => void; destroy: () => void } | null>(null);
+  const indexRef = useRef(index);
+  indexRef.current = index;
+
+  // 3D HOURGLASS BACKGROUND WIREFRAME
   useEffect(() => {
-    if (typeof window === "undefined" || !(window as any).THREE) return;
-    const THREE = (window as any).THREE;
     const canvas = document.getElementById("gl") as HTMLCanvasElement;
     if (!canvas) return;
 
-    let renderer: any;
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    } catch {
-      return;
-    }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    camera.position.set(0, 0, 11);
+    const instance = initHourglass(canvas, () => {
+      const cur = indexRef.current;
+      const s = slideStates[cur] || slideStates[0];
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        return {
+          x: 0,
+          y: 0.65,
+          s: 0.32,
+          rx: s.rx,
+          rz: s.rz,
+          o: 0.16,
+        };
+      }
+      return s;
+    });
 
-    const spin = new THREE.Group();
-    scene.add(spin);
-
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xb8612f, transparent: true, opacity: 0.18 });
-    const faintMat = new THREE.LineBasicMaterial({ color: 0x15312a, transparent: true, opacity: 0.08 });
-
-    const geom = new THREE.IcosahedronGeometry(2.8, 1);
-    const wire = new THREE.LineSegments(new THREE.WireframeGeometry(geom), lineMat);
-    spin.add(wire);
-
-    const outerGeom = new THREE.IcosahedronGeometry(4.2, 0);
-    const outerWire = new THREE.LineSegments(new THREE.WireframeGeometry(outerGeom), faintMat);
-    spin.add(outerWire);
-
-    const handleResize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    let frameId: number;
-    const animate = () => {
-      frameId = requestAnimationFrame(animate);
-      spin.rotation.y += 0.0015;
-      spin.rotation.x += 0.0008;
-      renderer.render(scene, camera);
-    };
-    animate();
+    hourglassRef.current = instance;
 
     return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", handleResize);
+      instance.destroy();
     };
   }, []);
 
@@ -298,6 +293,9 @@ export default function Biydalt3() {
 
       const dir = targetIndex > index ? 1 : -1;
       const targetSlide = slides[targetIndex];
+
+      // Flip & spin 3D hourglass dynamically
+      hourglassRef.current?.onChange(dir);
 
       if (!gsap) {
         setIndex(targetIndex);

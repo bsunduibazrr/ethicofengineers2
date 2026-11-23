@@ -78,6 +78,10 @@ button {
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  filter: blur(2.5px);
+  opacity: 0.88;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .grain {
