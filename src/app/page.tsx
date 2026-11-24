@@ -22,8 +22,22 @@ import {
 /* Hourglass poses                                                     */
 /* ------------------------------------------------------------------ */
 
-const POSE_INTRO: SlideState = { x: -0.55, y: 0.1, s: 1.1, rx: 0.16, rz: -0.15, o: 0.22 };
-const POSE_FAINT: SlideState = { x: 0.05, y: 0, s: 1.4, rx: 0.06, rz: 0.04, o: 0.1 };
+const POSE_INTRO: SlideState = {
+  x: -0.55,
+  y: 0.1,
+  s: 1.1,
+  rx: 0.16,
+  rz: -0.15,
+  o: 0.22,
+};
+const POSE_FAINT: SlideState = {
+  x: 0.05,
+  y: 0,
+  s: 1.4,
+  rx: 0.06,
+  rz: 0.04,
+  o: 0.1,
+};
 const POSE_CORNER: SlideState[] = [
   { x: 0.86, y: 0.6, s: 0.3, rx: 0.3, rz: -0.2, o: 0.55 },
   { x: 0.88, y: 0.58, s: 0.3, rx: -0.28, rz: 0.3, o: 0.55 },
@@ -122,7 +136,10 @@ function Facts({ items }: { items: IconItem[] }) {
       {items.map((f) => {
         const Icon = f.icon;
         return (
-          <li key={f.text + (f.bold ?? "")} className={f.muted ? "b2-muted" : ""}>
+          <li
+            key={f.text + (f.bold ?? "")}
+            className={f.muted ? "b2-muted" : ""}
+          >
             <Icon size={18} strokeWidth={1.8} />
             <span>
               {f.bold && <b>{f.bold} </b>}
@@ -172,15 +189,16 @@ function SlideBody({ s }: { s: Slide }) {
           <div className="b3-col">
             <div className="tag">{s.tag}</div>
             <Title html={s.title} />
-            <p className="b3-sub">{s.sub}</p>
-            <div className="b3-flow-label">Илтгэлийн бүтэц</div>
+            <p className="b3-sub">{s.sub}</p>=
             <ol className="b3-flow">
-              {["Бодит сургамж", ...GROUPS.slice(1).map((g) => g.name)].map((st, i) => (
-                <li key={st}>
-                  <b>0{i + 1}</b>
-                  {st}
-                </li>
-              ))}
+              {["Бодит сургамж", ...GROUPS.slice(1).map((g) => g.name)].map(
+                (st, i) => (
+                  <li key={st}>
+                    <b>0{i + 1}</b>
+                    {st}
+                  </li>
+                ),
+              )}
             </ol>
           </div>
           <div className="b3-cases">
@@ -217,13 +235,19 @@ function SlideBody({ s }: { s: Slide }) {
             <Sub s={s} />
             <div
               className="b3-stats"
-              style={{ gridTemplateColumns: `repeat(${s.stats.length},minmax(0,1fr))` }}
+              style={{
+                gridTemplateColumns: `repeat(${s.stats.length},minmax(0,1fr))`,
+              }}
             >
               {s.stats.map((st) => {
                 const Icon = st.icon;
                 return (
                   <div className="b3-stat" key={st.num}>
-                    <Icon className="b3-stat-icon" size={20} strokeWidth={1.6} />
+                    <Icon
+                      className="b3-stat-icon"
+                      size={20}
+                      strokeWidth={1.6}
+                    />
                     <div className="b3-stat-num">{st.num}</div>
                     <div className="b3-stat-label">
                       <T text={st.label} />
@@ -245,7 +269,9 @@ function SlideBody({ s }: { s: Slide }) {
           <Sub s={s} />
           <div
             className={`b2-cards n${s.cards.length}`}
-            style={{ gridTemplateColumns: `repeat(${s.cards.length},minmax(0,1fr))` }}
+            style={{
+              gridTemplateColumns: `repeat(${s.cards.length},minmax(0,1fr))`,
+            }}
           >
             {s.cards.map((c) => (
               <Card c={c} key={c.title} />
@@ -301,16 +327,14 @@ function SlideBody({ s }: { s: Slide }) {
                     </span>
                     <span className="b2-ladder-t">{r.text}</span>
                     <span className="b2-ladder-bar">
-                      <i style={{ width: `${((i + 1) / s.rows.length) * 100}%` }} />
+                      <i
+                        style={{ width: `${((i + 1) / s.rows.length) * 100}%` }}
+                      />
                     </span>
                   </li>
                 );
               })}
             </ol>
-            <div className="b2-ladder-axis">
-              <span>Хөнгөн</span>
-              <span>Хүнд</span>
-            </div>
           </div>
           <div className="b3-law">
             <div className="b3-law-top">
@@ -512,7 +536,9 @@ function SlideBody({ s }: { s: Slide }) {
                 <tr>
                   {tableHead.map((h, i) => (
                     <th key={h}>
-                      {i > 0 && <span className="b3-flag">{COUNTRIES[i - 1].code}</span>}
+                      {i > 0 && (
+                        <span className="b3-flag">{COUNTRIES[i - 1].code}</span>
+                      )}
                       {h}
                     </th>
                   ))}

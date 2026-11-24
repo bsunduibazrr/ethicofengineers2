@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { Download } from "lucide-react";
 import { initHourglass, SlideState } from "./hourglass";
@@ -119,7 +125,11 @@ export default function DeckShell({
       tl.fromTo(
         curtain,
         { clipPath: from },
-        { clipPath: "inset(0% 0% 0% 0%)", duration: 0.48, ease: "power3.inOut" },
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 0.48,
+          ease: "power3.inOut",
+        },
         0,
       )
         .fromTo(
@@ -135,7 +145,8 @@ export default function DeckShell({
           0.22,
         )
         .add(() => {
-          if (currentEl) gsap.set(currentEl, { clearProps: "transform,opacity" });
+          if (currentEl)
+            gsap.set(currentEl, { clearProps: "transform,opacity" });
           setIndex(targetIndex);
         }, 0.6)
         .to(
@@ -143,7 +154,11 @@ export default function DeckShell({
           { yPercent: -110 * dir, duration: 0.38, ease: "power3.in" },
           0.66,
         )
-        .to(curtain, { clipPath: to, duration: 0.55, ease: "power3.inOut" }, 0.78);
+        .to(
+          curtain,
+          { clipPath: to, duration: 0.55, ease: "power3.inOut" },
+          0.78,
+        );
 
       if (wipe) {
         gsap.fromTo(
@@ -235,14 +250,17 @@ export default function DeckShell({
         </div>
         <div className="deck-right">
           <div className="deck-nav-pills">
-            <Link href="/" className={`deck-pill ${deck === "02" ? "active" : ""}`}>
-              02 · ХАРЬЦУУЛСАН СУДАЛГАА
+            <Link
+              href="/"
+              className={`deck-pill ${deck === "02" ? "active" : ""}`}
+            >
+              БИЕ ДААЛТ 2
             </Link>
             <Link
               href="/biydalt3"
               className={`deck-pill ${deck === "03" ? "active" : ""}`}
             >
-              03 · КЕЙС ШИНЖИЛГЭЭ
+              БИЕ ДААЛТ 3
             </Link>
           </div>
           <a
@@ -252,7 +270,7 @@ export default function DeckShell({
             title="PowerPoint файлаар татах"
           >
             <Download size={14} strokeWidth={2} />
-            <span>PPTX</span>
+            <span>PPT TATAX</span>
           </a>
         </div>
       </header>
@@ -278,32 +296,6 @@ export default function DeckShell({
           <span style={{ marginLeft: "14px", color: "var(--ink-2)" }}>
             {names[index]}
           </span>
-        </div>
-        <div className="nav-buttons">
-          <button
-            onClick={() => goToSlide(index - 1)}
-            disabled={index === 0 || isBusy}
-            aria-label="Өмнөх слайд"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => goToSlide(index + 1)}
-            disabled={index === count - 1 || isBusy}
-            aria-label="Дараагийн слайд"
-          >
-            →
-          </button>
-          <button
-            onClick={() => {
-              if (!document.fullscreenElement)
-                document.documentElement.requestFullscreen?.();
-              else document.exitFullscreen?.();
-            }}
-            aria-label="Бүтэн дэлгэц"
-          >
-            {isFullscreen ? "×" : "⛶"}
-          </button>
         </div>
       </footer>
     </div>

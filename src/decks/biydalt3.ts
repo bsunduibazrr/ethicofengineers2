@@ -72,7 +72,11 @@ export type AccountSlide = Base & {
   law: { name: string; year: string; yearNote: string; effects: IconItem[] };
 };
 export type DecisionSlide = Base & { kind: "decision"; items: IconItem[] };
-export type RecsSlide = Base & { kind: "recs"; items: IconItem[]; photo: Photo };
+export type RecsSlide = Base & {
+  kind: "recs";
+  items: IconItem[];
+  photo: Photo;
+};
 
 export type Slide =
   | IntroSlide
@@ -154,7 +158,7 @@ export const slides: Slide[] = [
       src: "/images/korea-gumi.jpg",
       alt: "Гуми хотын панорам",
       badge: "GUMI · GYEONGSANGBUK-DO",
-      credit: "Academy of Korean Studies · KOGL",
+      credit: " ",
     },
     src: "Эх сурвалж: Nature News Blog (2012.10); Al Jazeera (2012.10.08)",
   },
@@ -221,7 +225,7 @@ export const slides: Slide[] = [
     step: 4,
     name: "Солонгос · Санал",
     tag: "01 · Өмнөд Солонгос · Манай багийн санал",
-    title: `Цаашид хэрэгжүүлэх ${mark("санал")}`,
+    title: `Цаашид хэрэгжүүлж болохуйц  ${mark("санал")}`,
     items: [
       {
         icon: ShieldCheck,
@@ -249,7 +253,7 @@ export const slides: Slide[] = [
       src: "/images/korea-hazmat.jpg",
       alt: "Химийн хамгаалалтын хувцастай аврагч",
       badge: "БЭЛЭН БАЙДАЛ",
-      credit: "U.S. Army National Guard · Public domain",
+      credit: " ",
     },
   },
 
@@ -281,7 +285,7 @@ export const slides: Slide[] = [
       src: "/images/france-azf.jpg",
       alt: "Дэлбэрэлтийн дараах AZF үйлдвэр",
       badge: "AZF · TOULOUSE · 21.09.2001",
-      credit: "Ville de Toulouse · CC BY-SA 3.0",
+      credit: " ",
     },
     src: "Эх сурвалж: Public Sénat (2021); IChemE Hazards 28; Ville de Toulouse архив",
   },
@@ -360,7 +364,7 @@ export const slides: Slide[] = [
     step: 4,
     name: "Франц · Санал",
     tag: "02 · Франц · Манай багийн санал",
-    title: `Цаашид хэрэгжүүлэх ${mark("санал")}`,
+    title: `Цаашид хэрэгжүүлж болохуйц ${mark("санал")}`,
     items: [
       { icon: Gavel, text: "Charte ISR-д сахилгын механизм нэмэх" },
       {
@@ -384,7 +388,7 @@ export const slides: Slide[] = [
       src: "/images/france-azf-memorial.jpg",
       alt: "Тулуз хот дахь AZF дурсгалын газар",
       badge: "MÉMORIAL AZF · TOULOUSE",
-      credit: "Olybrius · CC BY-SA 4.0",
+      credit: " ",
     },
   },
 
@@ -416,7 +420,7 @@ export const slides: Slide[] = [
       src: "/images/canada-mount-polley-mine.jpg",
       alt: "Mount Polley уурхай",
       badge: "MOUNT POLLEY · BRITISH COLUMBIA",
-      credit: "Wikimedia Commons · CC0",
+      credit: " ",
     },
     src: "Эх сурвалж: Independent Expert Engineering Investigation Panel (2015); EGBC (2022)",
   },
@@ -501,7 +505,7 @@ export const slides: Slide[] = [
     step: 4,
     name: "Канад · Санал",
     tag: "03 · Канад · Манай багийн санал",
-    title: `Цаашид хэрэгжүүлэх ${mark("санал")}`,
+    title: `Цаашид хэрэгжүүлж болохуйц ${mark("санал")}`,
     items: [
       {
         icon: ClipboardCheck,
@@ -524,7 +528,7 @@ export const slides: Slide[] = [
       src: "/images/canada-hazeltine.jpg",
       alt: "Сэргээгдэж буй Hazeltine гол",
       badge: "HAZELTINE CREEK · СЭРГЭЭЛТ",
-      credit: "Wikimedia Commons · CC0",
+      credit: " ",
     },
   },
 ];

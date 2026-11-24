@@ -162,10 +162,14 @@ export type Slide =
 export const mark = (w: string) =>
   `<em class='mark'>${w}<svg class='scr' viewBox='0 0 200 20' preserveAspectRatio='none' aria-hidden='true'><path d='M3 13 C 40 5, 90 17, 130 10 S 185 6, 197 12'/></svg></em>`;
 
-export const NO_INFO = "Баталгаатай мэдээлэл олдсонгүй";
+export const NO_INFO = "Баталгаатай мэдээлэл олдоогүй";
 
 export const GROUPS = [
-  { code: "", name: "Танилцуулга", steps: ["Нүүр", "Бодит сургамж", "Арга зүй"] },
+  {
+    code: "",
+    name: "Танилцуулга",
+    steps: ["Нүүр", "Бодит сургамж"],
+  },
   {
     code: "KR",
     name: "Өмнөд Солонгос",
@@ -174,7 +178,13 @@ export const GROUPS = [
   {
     code: "FR",
     name: "Франц",
-    steps: ["Холбоо", "Чиг үүрэг", "Charte ISR", "Хариуцлага", "UNAFIC ба IESF"],
+    steps: [
+      "Холбоо",
+      "Чиг үүрэг",
+      "Charte ISR",
+      "Хариуцлага",
+      "UNAFIC ба IESF",
+    ],
   },
   {
     code: "CA",
@@ -238,9 +248,21 @@ export const slides: Slide[] = [
     title: `Инженерийн алдаа ${mark("хүний аминд")} хүрдэг`,
     sub: "Бхопалын осол химийн инженерчлэлд ёс зүй яагаад чухал болохыг харуулсан бодит жишээ.",
     stats: [
-      { icon: Wind, num: "~45 тн", label: "метилизоцианатын хий алдагдсан [13]" },
-      { icon: Skull, num: "3,787", label: "нас баралтыг Засгийн газар баталсан [14]" },
-      { icon: Gavel, num: "2010", label: "удирдлагыг болгоомжгүй байдлаар шийтгэсэн [13]" },
+      {
+        icon: Wind,
+        num: "~45 тн",
+        label: "метилизоцианатын хий алдагдсан [13]",
+      },
+      {
+        icon: Skull,
+        num: "3,787",
+        label: "нас баралтыг Засгийн газар баталсан [14]",
+      },
+      {
+        icon: Gavel,
+        num: "2010",
+        label: "удирдлагыг болгоомжгүй байдлаар шийтгэсэн [13]",
+      },
     ],
     facts: [
       {
@@ -248,7 +270,10 @@ export const slides: Slide[] = [
         bold: "1984.12.03:",
         text: "Union Carbide-ийн Энэтхэгийн охин компанийн үйлдвэр [13]",
       },
-      { icon: TrendingUp, text: "Бусад тооцоогоор нас баралт хавьгүй өндөр [14]" },
+      {
+        icon: TrendingUp,
+        text: "Бусад тооцоогоор нас баралт хавьгүй өндөр [14]",
+      },
       {
         icon: ShieldAlert,
         bold: "Дүн шинжилгээ:",
@@ -259,45 +284,8 @@ export const slides: Slide[] = [
       src: "/images/bhopal.jpg",
       alt: "Бхопалын химийн үйлдвэрийн гамшиг",
       badge: "BHOPAL · 1984",
-      credit: "Bhopal · Wikimedia Commons",
+      credit: " ",
     },
-  },
-  {
-    kind: "cards",
-    group: 0,
-    step: 2,
-    name: "Арга зүй",
-    tag: "Судалгааны үндэслэл",
-    title: `Албан ёсны эх сурвалжид ${mark("суурилсан")} шинжилгээ`,
-    sub: "Гурван улсын мэргэжлийн холбоо, ёс зүйн дүрмийг харьцуулав.",
-    cards: [
-      {
-        icon: FileText,
-        title: "Албан ёсны эх сурвалж",
-        pill: "ЭХ СУРВАЛЖ",
-        desc: "Холбоодын сайт, ёс зүйн дүрэм, зохицуулагчийн мэдээг ашиглав.",
-      },
-      {
-        icon: Link2,
-        title: "Баримт бүрт ишлэл",
-        pill: "ИШЛЭЛ",
-        desc: "Он, тоо, заалт бүрийг [ ] дугаараар эх сурвалжтай нь холбов.",
-      },
-      {
-        icon: CircleHelp,
-        title: "Баталгаагүй мэдээлэл",
-        pill: "ХЯЗГААР",
-        desc: `Олдоогүй мэдээллийг "${NO_INFO}" гэж тэмдэглэв.`,
-        tone: "warn",
-      },
-      {
-        icon: Lightbulb,
-        title: "Дүн шинжилгээг ялгав",
-        pill: "ДҮН ШИНЖИЛГЭЭ",
-        desc: "Миний дүгнэлтийг баримтаас тусад нь тэмдэглэв.",
-        tone: "ink",
-      },
-    ],
   },
 
   /* ============ ӨМНӨД СОЛОНГОС ============ */
@@ -310,22 +298,19 @@ export const slides: Slide[] = [
     title: `Солонгосын ${mark("KIChE")} нийгэмлэг`,
     sub: "The Korean Institute of Chemical Engineers — БНСУ-ын химийн инженерчлэлийн мэргэжлийн нийгэмлэг.",
     stats: [
-      { icon: Landmark, num: "1962", label: "10 дугаар сарын 8-нд байгуулагдсан [1]" },
+      {
+        icon: Landmark,
+        num: "1962",
+        label: "10 дугаар сарын 8-нд байгуулагдсан [1]",
+      },
       { icon: Users, num: "6000+", label: "гишүүнтэй [1]" },
     ],
-    facts: [
-      {
-        icon: CircleHelp,
-        bold: "ТУЗ-ийн бүтэц, лиценз олгох эрх:",
-        text: NO_INFO,
-        muted: true,
-      },
-    ],
+    facts: [],
     photo: {
       src: "/images/korea.jpg",
       alt: "Сөүл хотын шөнийн дүр төрх",
       badge: "SOUTH KOREA · KIChE · 1962",
-      credit: "Seoul · Wikimedia Commons",
+      credit: " ",
     },
   },
   {
@@ -433,7 +418,8 @@ export const slides: Slide[] = [
     title: `UNAFIC холбоо ба ${mark("Удирдах зөвлөл")}`,
     sub: "Францын химийн инженерүүдийн холбоодын үндэсний нэгдэл.",
     year: "1910",
-    yearText: "Химийн дээд сургуулиудын төгсөгчдийн холбоодыг нэгтгэсэн үндэсний нэгдэл [2]",
+    yearText:
+      "Химийн дээд сургуулиудын төгсөгчдийн холбоодыг нэгтгэсэн үндэсний нэгдэл [2]",
     root: "UNAFIC",
     nodes: [
       {
@@ -480,7 +466,7 @@ export const slides: Slide[] = [
       src: "/images/france-chimie.jpg",
       alt: "Maison de la Chimie, Парис хот",
       badge: "MAISON DE LA CHIMIE · PARIS",
-      credit: "Maison de la Chimie · Wikimedia Commons",
+      credit: " ",
     },
   },
   {
@@ -504,7 +490,8 @@ export const slides: Slide[] = [
         title: "Хамт олон",
         pill: "02",
         desc: "Ажлын хамт олны гишүүний хувиар хүлээх үүрэг [3].",
-        extra: "Захиалагчид эрсдэл, хязгаарлалтыг мэдээлж, хамт олныхоо ур чадварыг дэмжинэ",
+        extra:
+          "Захиалагчид эрсдэл, хязгаарлалтыг мэдээлж, хамт олныхоо ур чадварыг дэмжинэ",
         tone: "ink",
       },
       {
@@ -512,7 +499,8 @@ export const slides: Slide[] = [
         title: "Нийгэм",
         pill: "03",
         desc: "Нийгмийн гишүүн, иргэний хувиар хүлээх үүрэг [3].",
-        extra: "Шинжлэх ухаан, технологи, нийгмийн холбоог хариуцлагатай хангана",
+        extra:
+          "Шинжлэх ухаан, технологи, нийгмийн холбоог хариуцлагатай хангана",
       },
     ],
   },
@@ -523,7 +511,7 @@ export const slides: Slide[] = [
     name: "Францын хариуцлага",
     tag: "Дүрмийн статус ба хууль",
     title: `Charte ISR ба ${mark("хуулийн")} хариуцлага`,
-    sub: "Charte нь сахилгын код биш; хуулийн хариуцлага Эрүүгийн хуулиар тодорхойлогдоно.",
+    sub: "Charte нь сахилгын код биш, хуулийн хариуцлага Эрүүгийн хуулиар тодорхойлогдоно.",
     cards: [
       {
         icon: BookOpen,
@@ -543,7 +531,7 @@ export const slides: Slide[] = [
       {
         icon: CircleHelp,
         title: "Сахилгын тогтолцоо",
-        pill: "ТОДОРХОЙГҮЙ",
+        pill: "ТОДОРХОЙГҮЙ, НУУЦЛАЛТАЙ БАЙЖ МАГАДГҮЙ",
         desc: `${NO_INFO}.`,
         tone: "warn",
       },
@@ -562,14 +550,16 @@ export const slides: Slide[] = [
       title: "UNAFIC",
       pill: "ХИМИЙН ИНЖЕНЕР",
       desc: "Химийн холбоо",
-      extra: "Химийн инженерийн сургуулиудын төгсөгчдийг нэгтгэж, мэргэжлийн төлөөлөл, карьер, ажил эрхлэлтэд төвлөрнө [2]",
+      extra:
+        "Химийн инженерийн сургуулиудын төгсөгчдийг нэгтгэж, мэргэжлийн төлөөлөл, карьер, ажил эрхлэлтэд төвлөрнө [2]",
     },
     b: {
       icon: Network,
       title: "IESF",
       pill: "БҮХ ИНЖЕНЕР",
       desc: "Үндэсний нэгдэл",
-      extra: "Бүх салбарын инженерийг хамарсан; ёс зүйн дүрэм Charte ISR-ийг боловсруулдаг [3]",
+      extra:
+        "Бүх салбарын инженерийг хамарсан; ёс зүйн дүрэм Charte ISR-ийг боловсруулдаг [3]",
       tone: "ink",
     },
     note: "Дүн шинжилгээ: UNAFIC холбоодыг уялдуулж, IESF ёс зүйн суурь зарчмыг тодорхойлно.",
@@ -596,10 +586,18 @@ export const slides: Slide[] = [
         desc: "Dominion Council of Professional Engineers; хууль тогтоомжийг уялдуулах зорилготой [15][7]",
       },
       { year: "1959", title: "CCPE", desc: "Нэрээ CCPE болгосон [7]" },
-      { year: "2007", title: "Engineers Canada", desc: "Одоогийн нэрээ авсан [7]" },
+      {
+        year: "2007",
+        title: "Engineers Canada",
+        desc: "Одоогийн нэрээ авсан [7]",
+      },
     ],
     facts: [
-      { icon: Users, bold: "Гишүүд:", text: "12 муж, нутгийн инженерийн зохицуулагч [7]" },
+      {
+        icon: Users,
+        bold: "Гишүүд:",
+        text: "12 муж, нутгийн инженерийн зохицуулагч [7]",
+      },
       {
         icon: Award,
         bold: "Лиценз:",
@@ -674,7 +672,7 @@ export const slides: Slide[] = [
       src: "/images/canada-iron-ring.jpg",
       alt: "Канадын инженерийн Iron Ring бөгж",
       badge: "IRON RING · ИНЖЕНЕРИЙН ҮҮРЭГ",
-      credit: "Sunny · CC BY 2.0",
+      credit: " ",
     },
   },
   {
@@ -774,7 +772,7 @@ export const slides: Slide[] = [
     name: "Монголд өгөх сургамж",
     tag: "Дүн шинжилгээ · Бодлогын санал",
     title: `Монголд авах ${mark("3 сургамж")}`,
-    sub: "Дүн шинжилгээ: энэ нь миний санал, баримт биш.",
+    sub: "Дүн шинжилгээ: энэ нь мaнaй багийн зүгээс гаргасан санал, баримт биш.",
     items: [
       {
         bold: "Дүрмийн статусыг хуульчлах",
@@ -830,9 +828,24 @@ export const tableHead = [
 ];
 
 export const tableRows: string[][] = [
-  ["Үндэсний байгууллага", "KIChE (1962) [1]", "UNAFIC (1910) / IESF [2][3]", "Engineers Canada (1936) [7]"],
-  ["Статус", "Мэргэжлийн нийгэмлэг [1]", "Төгсөгчдийн холбоодын нэгдэл [2]", "Мужийн зохицуулагчдын нэгдэл [7]"],
-  ["Лиценз олгох эрх", NO_INFO, NO_INFO, "Мужийн зохицуулагч (жишээ нь PEO) [8]"],
+  [
+    "Үндэсний байгууллага",
+    "KIChE (1962) [1]",
+    "UNAFIC (1910) / IESF [2][3]",
+    "Engineers Canada (1936) [7]",
+  ],
+  [
+    "Статус",
+    "Мэргэжлийн нийгэмлэг [1]",
+    "Төгсөгчдийн холбоодын нэгдэл [2]",
+    "Мужийн зохицуулагчдын нэгдэл [7]",
+  ],
+  [
+    "Лиценз олгох эрх",
+    NO_INFO,
+    NO_INFO,
+    "Мужийн зохицуулагч (жишээ нь PEO) [8]",
+  ],
   [
     "Ёс зүйн дүрэм",
     "Судалгаа, хэвлэлийн ёс зүй [1][12]",
@@ -862,7 +875,8 @@ export const tableRows: string[][] = [
 export const referencesList = [
   {
     id: "[1]",
-    title: "KIChE — Korean Institute of Chemical Engineers (албан ёсны сайт, нүүр хуудас)",
+    title:
+      "KIChE — Korean Institute of Chemical Engineers (албан ёсны сайт, нүүр хуудас)",
     url: "https://www.kiche.or.kr",
   },
   {

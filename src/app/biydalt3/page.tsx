@@ -103,7 +103,7 @@ function SlideBody({ s }: { s: Slide }) {
             <div className="tag">{s.tag}</div>
             <Title html={s.title} />
             <p className="b3-sub">{s.sub}</p>
-            <div className="b3-flow-label">Кейс бүрт 5 слайд</div>
+
             <ol className="b3-flow">
               {STEPS.map((st, i) => (
                 <li key={st}>
