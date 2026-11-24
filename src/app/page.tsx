@@ -1,1376 +1,833 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { initHourglass, SlideState } from "./hourglass";
+import { Fragment } from "react";
+import { ArrowDown, CircleHelp, Landmark } from "lucide-react";
+import type { SlideState } from "./hourglass";
+import DeckShell from "./DeckShell";
+import {
+  COUNTRIES,
+  GROUPS,
+  NO_INFO,
+  referencesList,
+  slides,
+  tableHead,
+  tableRows,
+  type CardItem,
+  type IconItem,
+  type Photo,
+  type Slide,
+} from "../decks/biydalt2";
 
 /* ------------------------------------------------------------------ */
-/* Types                                                               */
+/* Hourglass poses                                                     */
 /* ------------------------------------------------------------------ */
 
-interface Point {
-  bold: string;
-  text: string;
-  ref?: string;
-}
-
-interface Card {
-  title: string;
-  pill?: string;
-  desc?: string;
-  tone?: "ink" | "accent" | "warn";
-}
-
-interface SlideData {
-  name: string;
-  tag: string;
-  titleHtml: string;
-  sub?: string;
-  points?: Point[];
-  cards?: Card[]; // баруун талын карт жагсаалт
-  tiles?: string[]; // баруун талын зарчмын хавтангууд
-  layout?: "table" | "refs";
-  pose?: "hero" | "faint"; // 3D hourglass-ын байрлал
-  imageSrc?: string;
-  imageAlt?: string;
-  imageBadge?: string;
-  imageSource?: string;
-}
-
-const NO_INFO = "Баталгаатай мэдээлэл олдсонгүй";
-
-// Гарчгийн доогуурлалт
-const mark = (word: string) =>
-  `<em class='mark'>${word}<svg class='scr' viewBox='0 0 200 20' preserveAspectRatio='none' aria-hidden='true'><path d='M3 13 C 40 5, 90 17, 130 10 S 185 6, 197 12'/></svg></em>`;
-
-/* ------------------------------------------------------------------ */
-/* Slides                                                              */
-/* ------------------------------------------------------------------ */
-
-const slides: SlideData[] = [
-  // 1. Нүүр
-  {
-    name: "Нүүр",
-    tag: "Химийн инженерийн ёс зүй · Харьцуулсан судалгаа",
-    titleHtml: `Мэргэжлийн ёс зүй ба ${mark("хариуцлага")}`,
-    sub: "Өмнөд Солонгос, Франц, Канад улсын мэргэжлийн холбоо, ёс зүйн дүрмийн харьцуулсан судалгаа",
-    pose: "hero",
-    imageSrc: "/images/chemical-plant.jpg",
-    imageAlt: "Химийн үйлдвэрийн цогцолбор",
-    imageBadge: "АЖ ҮЙЛДВЭРИЙН ХАРИУЦЛАГА",
-    imageSource: "Wikimedia Commons",
-  },
-
-  // 2. Бодит сургамж: Бхопал
-  {
-    name: "Бодит сургамж",
-    tag: "Аюулгүй байдал ба хүний амь нас",
-    titleHtml: `Инженерийн алдаа ${mark("хүний аминд")} хүрдэг`,
-    sub: "Бхопалын осол химийн инженерчлэлд ёс зүй яагаад чухал болохыг харуулсан бодит жишээ.",
-    points: [
-      {
-        bold: "1984 оны 12-р сарын 3:",
-        text: "Union Carbide-ийн Энэтхэгийн охин компанийн үйлдвэрээс ойролцоогоор 45 тонн метилизоцианатын хий алдагдсан",
-        ref: "[13]",
-      },
-      {
-        bold: "Хохирол:",
-        text: "Засгийн газар 3,787 нас баралтыг баталсан; бусад тооцоо хавьгүй өндөр",
-        ref: "[14]",
-      },
-      {
-        bold: "Хариуцлага:",
-        text: "2010 онд охин компанийн хэдэн удирдлагыг болгоомжгүй байдлаар буруутган шийтгэсэн",
-        ref: "[13]",
-      },
-      {
-        bold: "Дүн шинжилгээ:",
-        text: "Аюулгүй байдлыг ашгаас дээгүүр тавих нь инженерийн үүрэг.",
-      },
-    ],
-    imageSrc: "/images/bhopal.jpg",
-    imageAlt: "Бхопалын химийн үйлдвэрийн гамшиг",
-    imageBadge: "BHOPAL · 1984",
-    imageSource: "Bhopal · Wikimedia Commons",
-  },
-
-  // 3. Арга зүй
-  {
-    name: "Арга зүй",
-    tag: "Судалгааны үндэслэл",
-    titleHtml: `Албан ёсны эх сурвалжид ${mark("суурилсан")} шинжилгээ`,
-    sub: "Гурван улсын мэргэжлийн холбоо, ёс зүйн дүрмийг харьцуулав.",
-    cards: [
-      {
-        title: "1. Албан ёсны эх сурвалж",
-        pill: "ЭХ СУРВАЛЖ",
-        desc: "Холбоодын сайт, ёс зүйн дүрэм, зохицуулагчийн мэдээг ашиглав.",
-      },
-      {
-        title: "2. Баримт бүрт ишлэл",
-        pill: "ИШЛЭЛ",
-        desc: "Он, тоо, заалт бүрийг [ ] дугаараар эх сурвалжтай нь холбов.",
-      },
-      {
-        title: "3. Баталгаагүй мэдээлэл",
-        pill: "ХЯЗГААР",
-        desc: `Олдоогүй мэдээллийг "${NO_INFO}" гэж тэмдэглэв.`,
-        tone: "warn",
-      },
-      {
-        title: "4. Дүн шинжилгээг ялгав",
-        pill: "ДҮН ШИНЖИЛГЭЭ",
-        desc: "Миний дүгнэлтийг баримтаас тусад нь тэмдэглэв.",
-        tone: "accent",
-      },
-    ],
-  },
-
-  // 4. БНСУ: KIChE
-  {
-    name: "Өмнөд Солонгос",
-    tag: "БНСУ · KIChE · Химийн инженерчлэлийн холбоо",
-    titleHtml: `Солонгосын ${mark("KIChE")} нийгэмлэг`,
-    sub: "The Korean Institute of Chemical Engineers — БНСУ-ын химийн инженерчлэлийн мэргэжлийн нийгэмлэг.",
-    points: [
-      {
-        bold: "Байгуулагдсан:",
-        text: "1962 оны 10 дугаар сарын 8",
-        ref: "[1]",
-      },
-      {
-        bold: "Гишүүд:",
-        text: "6000 гаруй гишүүнтэй",
-        ref: "[1]",
-      },
-      {
-        bold: "ТУЗ-ийн бүтэц, лиценз олгох эрх:",
-        text: NO_INFO,
-      },
-    ],
-    imageSrc: "/images/korea.jpg",
-    imageAlt: "Сөүл хотын шөнийн дүр төрх",
-    imageBadge: "SOUTH KOREA · KIChE · 1962",
-    imageSource: "Seoul · Wikimedia Commons",
-  },
-
-  // 5. БНСУ: чиг үүрэг
-  {
-    name: "KIChE чиг үүрэг",
-    tag: "БНСУ · KIChE · Чиг үүрэг",
-    titleHtml: `Тус нийгэмлэг ${mark("юу хийдэг")} вэ?`,
-    sub: "Судалгаа, мэргэшүүлэлт, олон улсын хамтын ажиллагаагаар салбарыг дэмждэг.",
-    cards: [
-      {
-        title: "1. Судалгаа, инновац",
-        pill: "СУДАЛГАА",
-        desc: "Судалгааны шинэ үр дүнг үйлдвэрлэлд нэвтрүүлж, инновацыг дэмждэг [1].",
-      },
-      {
-        title: "2. Инженерүүдийг мэргэшүүлэх",
-        pill: "МЭРГЭШИЛ",
-        desc: "Инженерүүдийн мэдлэг, чадварыг дээшлүүлнэ [1].",
-      },
-      {
-        title: "3. Олон улсын хамтын ажиллагаа",
-        pill: "ОЛОН УЛС",
-        desc: "БНСУ-ын химийн инженерчлэлийн салбарын хөгжилд хувь нэмэр оруулдаг [1].",
-      },
-    ],
-  },
-
-  // 6. БНСУ: ёс зүйн баримтууд
-  {
-    name: "Ёс зүйн баримтууд",
-    tag: "БНСУ · Ёс зүйн дүрэм",
-    titleHtml: `Ёс зүйн ${mark("хоёр баримт")} бичиг`,
-    sub: "Хоёулаа судалгаа, хэвлэлийн ёс зүйтэй холбоотой баримт; инженерийн лицензийн ёс зүй биш [1][12].",
-    cards: [
-      {
-        title: "KIChE (한국화학공학회)",
-        pill: "2008.09.11",
-        desc: "Эрдэм шинжилгээний сэтгүүл хэвлэлийн ёс зүйн удирдамж; 2009, 2010, 2016, 2017, 2020 онд шинэчилсэн [1].",
-      },
-      {
-        title: "KSIEC (한국공업화학회)",
-        pill: "2007.10.08",
-        desc: "Судалгааны ёс зүйн тунхаг [12].",
-      },
-    ],
-  },
-
-  // 7. БНСУ: зарчим
-  {
-    name: "Ёс зүйн зарчим",
-    tag: "БНСУ · Үндсэн зарчим",
-    titleHtml: `Ёс зүйн дүрмийн ${mark("6 зарчим")}`,
-    sub: "Хоёр нийгэмлэгийн ёс зүйн баримтад тусгагдсан зарчмууд [1][12].",
-    tiles: [
-      "Мэргэжлийн хариуцлага",
-      "Нууц хадгалах",
-      "Шударга байдал",
-      "Оюуны өмчийг хүндэтгэх",
-      "Шударга үнэлгээ",
-      "Байгаль орчны хамгаалал",
-    ],
-  },
-
-  // 8. БНСУ: хариуцлага
-  {
-    name: "Хариуцлагын төрөл",
-    tag: "БНСУ · Хариуцлага ба сахилга",
-    titleHtml: `Хүлээлгэх ${mark("хариуцлагын төрлүүд")}`,
-    sub: `Эдгээр нь нийгэмлэгийн гишүүн, зохиогчид хамаарах арга хэмжээ [1][12]. Мэргэжлийн инженерийн ёс зүйн хариуцлага: ${NO_INFO}.`,
-    cards: [
-      { title: "1. Анхааруулга", pill: "ХАРИУЦЛАГА" },
-      { title: "2. Өгүүлэл нийтлэхийг хориглох", pill: "ХАРИУЦЛАГА" },
-      { title: "3. Өгүүлэл буцаан татах", pill: "ХАРИУЦЛАГА" },
-      { title: "4. Гишүүнчлэл түдгэлзүүлэх", pill: "ХАРИУЦЛАГА" },
-    ],
-  },
-
-  // 9. Франц: UNAFIC
-  {
-    name: "Франц: UNAFIC",
-    tag: "Франц · Химийн инженерийн холбоо",
-    titleHtml: `UNAFIC холбоо ба ${mark("Удирдах зөвлөл")}`,
-    sub: "Францын химийн инженерүүдийн холбоодын үндэсний нэгдэл.",
-    points: [
-      {
-        bold: "UNAFIC (1910 он):",
-        text: "Химийн дээд сургуулиудын төгсөгчдийн холбоодыг нэгтгэсэн үндэсний нэгдэл",
-        ref: "[2]",
-      },
-      {
-        bold: "Холбооны зөвлөл (Conseil Fédéral):",
-        text: "Сар бүр хуралдаж, бодлого чиглэл, Удирдах багийн хяналтыг хэрэгжүүлнэ",
-        ref: "[2]",
-      },
-      {
-        bold: "Удирдах баг (Bureau):",
-        text: "Ерөнхийлөгч тэргүүтэй, 2 жилийн хугацаатай өдөр тутмын удирдлага",
-        ref: "[2]",
-      },
-    ],
-    cards: [
-      {
-        title: "Холбооны зөвлөл (Conseil Fédéral)",
-        pill: "САР БҮР",
-        desc: "Бодлого чиглэлийг тодорхойлж, Удирдах багийн үйл ажиллагаанд хяналт тавина [2].",
-      },
-      {
-        title: "Удирдах баг (Bureau)",
-        pill: "2 ЖИЛ",
-        desc: "Ерөнхийлөгч тэргүүтэй, өдөр тутмын удирдлагыг хэрэгжүүлнэ [2].",
-      },
-    ],
-  },
-
-  // 10. Франц: чиг үүрэг
-  {
-    name: "Франц: Чиг үүрэг",
-    tag: "Франц · Төлөөлөл ба карьер",
-    titleHtml: `Химийн инженерүүдийг ${mark("төлөөлөх")} чиг үүрэг`,
-    sub: "UNAFIC нь инженерүүдийн эрх ашиг, карьер, боловсролыг дэмждэг.",
-    points: [
-      {
-        bold: "Мэргэжлийн төлөөлөл:",
-        text: "Франц болон олон улсад химийн инженерүүдийн ашиг сонирхлыг төлөөлнө",
-        ref: "[2]",
-      },
-      {
-        bold: "Ажил эрхлэлт:",
-        text: "Хөдөлмөр эрхлэлт, цалин хөлсний судалгаа нийтэлж мэдээллээр хангана",
-        ref: "[2]",
-      },
-      {
-        bold: "Оюутан, залуу мэргэжилтэн:",
-        text: "Үзэсгэлэн, форум зохион байгуулж, карьерын сүлжээ үүсгэнэ",
-        ref: "[2]",
-      },
-    ],
-    imageSrc: "/images/france-chimie.jpg",
-    imageAlt: "Maison de la Chimie, Парис хот",
-    imageBadge: "MAISON DE LA CHIMIE · PARIS",
-    imageSource: "Maison de la Chimie · Wikimedia Commons",
-  },
-
-  // 11. Франц: Charte ISR
-  {
-    name: "Charte ISR",
-    tag: "Франц · Ёс зүйн үндсэн зарчим",
-    titleHtml: `Хариуцлагатай инженерийн ${mark("дүрэм")} (Charte ISR)`,
-    sub: "IESF 2001 онд Ёс зүйн дүрмээ баталсан; 2020 оны сүүлээс шинэчилж Charte ISR болгосон [6][3]. ISR = Ingénieur et Scientifique Responsables.",
-    points: [
-      {
-        bold: "1. Хувь хүн:",
-        text: "Оюун ухаан, ухамсартай мэргэжилтэн; мэргэжлээ сурталчилна",
-        ref: "[3]",
-      },
-      {
-        bold: "2. Хамт олон:",
-        text: "Захиалагчид эрсдэл, хязгаарлалтыг мэдээлж, хамт олныхоо ур чадварыг дэмжинэ",
-        ref: "[3]",
-      },
-      {
-        bold: "3. Нийгэм:",
-        text: "Шинжлэх ухаан, технологи, нийгмийн холбоог хариуцлагатай хангана",
-        ref: "[3]",
-      },
-    ],
-    cards: [
-      {
-        title: "1. Хувь хүнийн хүрээ",
-        pill: "ХУВЬ ХҮН",
-        desc: "Инженер, эрдэмтэн хувь хүнийхээ хувиар хүлээх үүрэг [3].",
-      },
-      {
-        title: "2. Хамт олны хүрээ",
-        pill: "ХАМТ ОЛОН",
-        desc: "Ажлын хамт олны гишүүний хувиар хүлээх үүрэг [3].",
-      },
-      {
-        title: "3. Нийгмийн хүрээ",
-        pill: "НИЙГЭМ",
-        desc: "Нийгмийн гишүүн, иргэний хувиар хүлээх үүрэг [3].",
-      },
-    ],
-  },
-
-  // 12. Франц: хариуцлага
-  {
-    name: "Францын хариуцлага",
-    tag: "Франц · Дүрмийн статус ба хууль",
-    titleHtml: `Charte ISR ба ${mark("хуулийн")} хариуцлага`,
-    sub: "Charte нь сахилгын код биш; хуулийн хариуцлага Эрүүгийн хуулиар тодорхойлогдоно.",
-    points: [
-      {
-        bold: "Дүрмийн статус:",
-        text: "Мэргэжлийн итгэл үнэмшлийн баримт; өмнөх «code de déontologie»-г солисон",
-        ref: "[6]",
-      },
-      {
-        bold: "Эрүүгийн хууль, 121-3 зүйл:",
-        text: "Болгоомжгүй байдал ямар нөхцөлд гэмт хэрэг болохыг тодорхойлдог",
-        ref: "[5]",
-      },
-      {
-        bold: "Сахилгын систем:",
-        text: NO_INFO,
-      },
-    ],
-    cards: [
-      {
-        title: "1. Ёс зүйн дүрэм",
-        pill: "СААЙН ДУРЫН",
-        desc: "Charte нь сахилга шийтгэлийн код биш, мэргэжлийн итгэл үнэмшлийг илэрхийлдэг [6].",
-        tone: "ink",
-      },
-      {
-        title: "2. Эрүүгийн хууль 121-3",
-        pill: "ХУУЛЬ",
-        desc: "Болгоомжгүй байдлын гэм бурууг тодорхойлдог зүйл; тодорхой ялыг бусад зүйл тогтооно [5].",
-        tone: "warn",
-      },
-      {
-        title: "3. Сахилгын тогтолцоо",
-        pill: "ТОДОРХОЙГҮЙ",
-        desc: `${NO_INFO}.`,
-        tone: "accent",
-      },
-    ],
-  },
-
-  // 13. Франц: UNAFIC vs IESF
-  {
-    name: "UNAFIC ба IESF",
-    tag: "Франц · Байгууллагын харьцуулалт",
-    titleHtml: `UNAFIC болон IESF-ийн ${mark("харилцан нөхөх")} үүрэг`,
-    sub: "Химийн инженерийн дагнасан холбоо ба бүх салбарын нэгдлийн ялгаа.",
-    points: [
-      {
-        bold: "UNAFIC:",
-        text: "Химийн инженерийн сургуулиудын төгсөгчдийг нэгтгэж, карьер, ажил эрхлэлтэд төвлөрнө",
-        ref: "[2]",
-      },
-      {
-        bold: "IESF:",
-        text: "Бүх салбарын инженерүүдийн ёс зүйн дүрэм (Charte ISR)-ийг гаргадаг",
-        ref: "[3]",
-      },
-      {
-        bold: "Дүн шинжилгээ:",
-        text: "UNAFIC холбоодыг уялдуулж, IESF ёс зүйн суурь зарчмыг тодорхойлно.",
-      },
-    ],
-    cards: [
-      {
-        title: "UNAFIC (Химийн холбоо)",
-        pill: "ХИМИЙН ИНЖЕНЕР",
-        desc: "Химийн инженерийн сургуулиудын төгсөгчдийг нэгтгэдэг; мэргэжлийн төлөөлөл, ажил эрхлэлтэд төвлөрнө [2].",
-      },
-      {
-        title: "IESF (Үндэсний нэгдэл)",
-        pill: "БҮХ ИНЖЕНЕР",
-        desc: "Бүх салбарын инженерийг хамарсан; ёс зүйн дүрэм Charte ISR-ийг боловсруулдаг [3].",
-      },
-    ],
-  },
-
-  // 14. Канад: холбоо, түүх
-  {
-    name: "Канад: Холбоо",
-    tag: "Канад · Мэргэжлийн холбоо",
-    titleHtml: `Engineers Canada ба ${mark("мужийн")} зохицуулагчид`,
-    sub: "Үндэсний холбоо нь мужуудын зохицуулагчдын нэгдэл; лиценз олгох ажлыг мужууд хийдэг.",
-    points: [
-      {
-        bold: "1936 он:",
-        text: "Dominion Council of Professional Engineers нэрээр байгуулагдсан",
-        ref: "[7]",
-      },
-      {
-        bold: "Гишүүд:",
-        text: "12 муж, нутгийн инженерийн зохицуулагч",
-        ref: "[7]",
-      },
-      {
-        bold: "Лиценз:",
-        text: "Мужийн зохицуулагч (жишээ нь PEO) инженерийг лицензжүүлдэг",
-        ref: "[8]",
-      },
-    ],
-    cards: [
-      {
-        title: "1920 · Эхний 6 зохицуулагч",
-        pill: "МУЖ",
-        desc: "BC, Alberta, Manitoba, New Brunswick, Nova Scotia, Quebec [15].",
-      },
-      {
-        title: "1936 · Үндэсний зөвлөл",
-        pill: "ҮНДЭСНИЙ",
-        desc: "Хууль тогтоомжийг уялдуулах зорилгоор байгуулагдсан [15][7].",
-      },
-      {
-        title: "1959 · 2007 · Нэр солилт",
-        pill: "ТҮҮХ",
-        desc: "1959 онд CCPE, 2007 онд Engineers Canada болсон [7].",
-      },
-    ],
-  },
-
-  // 15. Канад: засаглал
-  {
-    name: "Канад: Засаглал",
-    tag: "Канад · Үндэсний ба мужийн түвшин",
-    titleHtml: `Хоёр түвшний ${mark("засаглал")}`,
-    sub: "Үндэсний холбоо удирдамж гаргана; мужийн зохицуулагч хууль, лиценз, сахилгыг хэрэгжүүлнэ.",
-    points: [
-      {
-        bold: "Удирдамж:",
-        text: "Canadian Engineering Qualifications Board боловсруулж, Engineers Canada-гийн ТУЗ батална",
-        ref: "[16]",
-      },
-      {
-        bold: "Магадлан итгэмжлэл:",
-        text: "Хөтөлбөрийг CEAB мужуудын нэрийн өмнөөс магадлана",
-        ref: "[7]",
-      },
-      {
-        bold: "ТУЗ-д олон нийтийн төлөөлөл:",
-        text: NO_INFO,
-      },
-    ],
-    cards: [
-      {
-        title: "Үндэсний · Engineers Canada",
-        pill: "ЗОХИЦУУЛАЛТ",
-        desc: "Удирдамж, магадлан итгэмжлэл, олон улсын хөдөлгөөн, мужуудын хамтын ажиллагаа [7].",
-        tone: "ink",
-      },
-      {
-        title: "Мужийн · PEO, EGBC гэх мэт",
-        pill: "ХУУЛЬ",
-        desc: "Лиценз олгох, ёс зүйн дүрэм мөрдүүлэх, сахилгын хэрэг хянах [8][9].",
-        tone: "accent",
-      },
-    ],
-  },
-
-  // 16. Канад: ёс зүйн дүрэм
-  {
-    name: "Канадын ёс зүй",
-    tag: "Канад · Ёс зүйн дүрэм",
-    titleHtml: `«Hold paramount» ${mark("зарчим")}`,
-    sub: "Нийтийн аюулгүй байдал, эрүүл мэнд, байгаль орчныг хамгаалах нь бусад бүх үүргээс дээгүүр [4][17].",
-    points: [
-      {
-        bold: "Хувилбар:",
-        text: "2016 оны 3-р сарын Public Guideline; 2024 оны 7-р сард шинэчилсэн",
-        ref: "[17][4]",
-      },
-      {
-        bold: "«Paramount» гэдэг нь:",
-        text: "Аюулгүй байдал эрсдэлд орвол бусад заалт доогуур орно",
-        ref: "[17]",
-      },
-    ],
-    tiles: [
-      "Нийтийн аюулгүй байдал, байгаль орчин",
-      "Ур чадварын хүрээнд ажиллах",
-      "Ажил олгогчийн итгэмжит төлөөлөгч, нууц хадгалах",
-      "Ашиг сонирхлын зөрчлийг мэдэгдэх",
-      "Инженерийн нэр хүндийг дээшлүүлэх",
-    ],
-  },
-
-  // 17. Канад: хууль ба санкц
-  {
-    name: "Канад: Хариуцлага",
-    tag: "Канад · Заавал ба сайн дурын, санкц",
-    titleHtml: `Хуулийн ${mark("хүч")} ба санкц`,
-    sub: "Үндэсний удирдамж зөвлөмж шинжтэй; заавал дагах дүрэм мужийн хуульд байдаг.",
-    points: [
-      {
-        bold: "Үндэсний удирдамж:",
-        text: "Сайн дурын; инженер түүнд шууд хариуцлага хүлээдэггүй",
-        ref: "[16]",
-      },
-      {
-        bold: "Мужийн код:",
-        text: "Ontario-д Professional Engineers Act-д тусгагдсан; BC-д EGBC Bylaws-ийн Schedule A",
-        ref: "[8][9]",
-      },
-      {
-        bold: "Мэдээлэх үүрэг:",
-        text: "Заавал ба сайн дурын мэдээлэл гэж ялгадаг; муж бүрийн хуулиас хамаарна",
-        ref: "[11]",
-      },
-    ],
-    cards: [
-      {
-        title: "BC: торгууль",
-        pill: "EGBC",
-        desc: "Лиценз түдгэлзүүлэх, цуцлах; хувь хүнд $100,000 хүртэл, фирмд $250,000 хүртэл торгууль [9][10].",
-        tone: "warn",
-      },
-      {
-        title: "Муж бүр өөр",
-        pill: "ХАРЬЦУУЛАЛТ",
-        desc: "Саскачеванд одоогийн дээд торгууль $15,000 (APEGS-ийн баримтаар) [18].",
-        tone: "ink",
-      },
-      {
-        title: "Mount Polley (BC)",
-        pill: "ЖИШЭЭ",
-        desc: "Хуучин хуулиар дээд хэмжээ $25,000 байсан; инженерүүдэд торгууль ногдуулсан [10].",
-        tone: "accent",
-      },
-    ],
-  },
-
-  // 18. Нэгдсэн харьцуулалт
-  {
-    name: "Нэгдсэн харьцуулалт",
-    tag: "Харьцуулсан судалгаа",
-    titleHtml: `Гурван улсын тогтолцооны ${mark("харьцуулалт")}`,
-    sub: "Бүтэц, дүрмийн статус, санкц, эрсдэл мэдээлэх үүргийг нэгтгэв.",
-    layout: "table",
-    pose: "faint",
-  },
-
-  // 19. Ижил ба ялгаатай
-  {
-    name: "Ижил ба ялгаатай",
-    tag: "Дүн шинжилгээ",
-    titleHtml: `Ижил төстэй тал ба ${mark("онцлог ялгаа")}`,
-    sub: "Дүн шинжилгээ: гурван улс нийтийн ашиг сонирхлыг дээдэлдэг ч хэрэгжүүлэх механизм нь өөр.",
-    points: [
-      {
-        bold: "Ижил тал:",
-        text: "Мэргэжлийн хариуцлага, байгаль орчны хамгаалал, ур чадварыг бүгд тусгасан",
-        ref: "[1][3][4]",
-      },
-      {
-        bold: "Статусын ялгаа:",
-        text: "Канадад мужийн код заавал; Францад Charte сайн дурын",
-        ref: "[8][6]",
-      },
-      {
-        bold: "Тогтолцооны ялгаа:",
-        text: `Канадад зохицуулагч лиценз олгоно; Солонгос, Францын лицензийн мэдээлэл: ${NO_INFO}`,
-        ref: "[8]",
-      },
-    ],
-    cards: [
-      {
-        title: "БНСУ",
-        pill: "НИЙГЭМЛЭГ",
-        desc: "Судалгаа, хэвлэлийн ёс зүйн баримт; арга хэмжээ гишүүн, зохиогчид хамаарна [1][12].",
-      },
-      {
-        title: "Франц",
-        pill: "ХОЛБОО + ХУУЛЬ",
-        desc: "Сайн дурын Charte ISR; хуулийн хариуцлага Эрүүгийн хуулиар [6][5].",
-      },
-      {
-        title: "Канад",
-        pill: "МУЖИЙН ХУУЛЬ",
-        desc: "Мужийн хуулиар заавал дүрэм, лицензийн сахилга [8][9].",
-      },
-    ],
-  },
-
-  // 20. Монголд өгөх сургамж
-  {
-    name: "Монголд өгөх сургамж",
-    tag: "Дүн шинжилгээ · Бодлогын санал",
-    titleHtml: `Монголд авах ${mark("3 сургамж")}`,
-    sub: "Дүн шинжилгээ: энэ нь миний санал, баримт биш.",
-    points: [
-      {
-        bold: "1. Дүрмийн статусыг хуульчлах:",
-        text: "Ёс зүйн дүрмийг хуулийн хүрээнд тусгах (Канадын мужийн загвар)",
-        ref: "[8]",
-      },
-      {
-        bold: "2. Эрсдэл мэдээлэх удирдамж:",
-        text: "Заавал ба сайн дурын мэдээллийн нөхцөлийг тодорхойлох (Канадын Duty to report)",
-        ref: "[11]",
-      },
-      {
-        bold: "3. Нийгмийн хариуцлага:",
-        text: "Нийгэм, байгаль орчны хариуцлагыг дүрэмд тусгах (Франц Charte ISR)",
-        ref: "[3]",
-      },
-    ],
-    cards: [
-      {
-        title: "Мэргэжлийн холбоо",
-        pill: "САНАЛ",
-        desc: "Ёс зүйн дүрэм батлах, сахилгын журам боловсруулах.",
-      },
-      {
-        title: "Төр, хууль тогтоогч",
-        pill: "САНАЛ",
-        desc: "Дүрмийн заавал биелэх статусыг хуульд тусгах.",
-      },
-      {
-        title: "Их сургууль, ажил олгогч",
-        pill: "САНАЛ",
-        desc: "Ёс зүйн сургалт, эрсдэл мэдээлэх соёлыг төлөвшүүлэх.",
-      },
-    ],
-  },
-
-  // 21. Эх сурвалжууд
-  {
-    name: "Эх сурвалжууд",
-    tag: "Албан ёсны эх баримтууд",
-    titleHtml: `Ашигласан ${mark("эх сурвалжууд")}`,
-    sub: "Слайд дээр ишлэгдсэн бүх эх сурвалж.",
-    layout: "refs",
-    pose: "faint",
-  },
+const POSE_INTRO: SlideState = { x: -0.55, y: 0.1, s: 1.1, rx: 0.16, rz: -0.15, o: 0.22 };
+const POSE_FAINT: SlideState = { x: 0.05, y: 0, s: 1.4, rx: 0.06, rz: 0.04, o: 0.1 };
+const POSE_CORNER: SlideState[] = [
+  { x: 0.86, y: 0.6, s: 0.3, rx: 0.3, rz: -0.2, o: 0.55 },
+  { x: 0.88, y: 0.58, s: 0.3, rx: -0.28, rz: 0.3, o: 0.55 },
 ];
-
-/* ------------------------------------------------------------------ */
-/* Эх сурвалж ба хүснэгт                                               */
-/* ------------------------------------------------------------------ */
-
-const referencesList = [
-  {
-    id: "[1]",
-    title:
-      "KIChE — Korean Institute of Chemical Engineers (албан ёсны сайт, нүүр хуудас)",
-    url: "https://www.kiche.or.kr",
-  },
-  {
-    id: "[2]",
-    title: "UNAFIC — Дүрэм (statuts), зорилго, удирдлагын бүтэц",
-    url: "https://www.unafic.org/unafic/statuts/",
-  },
-  {
-    id: "[3]",
-    title: "IESF — Charte ISR ба Lexique",
-    url: "https://www.iesf.fr/offres/doc_inline_src/752/IESF%2BCharte%2BISR%2Blexique%2BV6.2.pdf",
-  },
-  {
-    id: "[4]",
-    title: "Engineers Canada — Guideline on the code of ethics (2024)",
-    url: "https://engineerscanada.ca/sites/default/files/2024-07/Guideline_on_the_code_of_ethics-2024.pdf",
-  },
-  {
-    id: "[5]",
-    title: "Францын Эрүүгийн хууль (Code pénal) — 121-3 дугаар зүйл",
-    url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006417208/",
-  },
-  {
-    id: "[6]",
-    title: "IESF/CNISF — Charte d'Éthique de l'Ingénieur (2001)",
-    url: "https://wwwine.polytech.umontpellier.fr/images/ecole/ddrs/Charte-ethique-ing%C3%A9nieur.pdf",
-  },
-  {
-    id: "[7]",
-    title: "Engineers Canada — Realizing tomorrow's (түүх, гишүүд, чиг үүрэг)",
-    url: "https://engineerscanada.ca/about/governance/realizing-tomorrows",
-  },
-  {
-    id: "[8]",
-    title: "Professional Engineers Ontario (PEO) — Code of Ethics",
-    url: "https://peo.on.ca/licence-holders/code-ethics",
-  },
-  {
-    id: "[9]",
-    title: "Engineers and Geoscientists BC — Complaints and discipline",
-    url: "https://www.egbc.ca/For-Members/Complaints",
-  },
-  {
-    id: "[10]",
-    title: "EGBC — Mount Polley: Three Engineers Disciplined",
-    url: "https://egbc.ca/News/News-Releases/Mount-Polley-Investigation-Concludes-Three-Enginee",
-  },
-  {
-    id: "[11]",
-    title: "Engineers Canada — Guideline on the duty to report (2024)",
-    url: "https://engineerscanada.ca/sites/default/files/2024-07/Guideline_on_duty_to_report-2024.pdf",
-  },
-  {
-    id: "[12]",
-    title: "KSIEC — Korean Society of Industrial and Engineering Chemistry",
-    url: "https://www.ksiec.or.kr",
-  },
-  {
-    id: "[13]",
-    title: "Encyclopaedia Britannica — Bhopal disaster",
-    url: "https://www.britannica.com/EBchecked/topic/1257131/Bhopal-disaster",
-  },
-  {
-    id: "[14]",
-    title: "Wikipedia — Bhopal disaster (хоёрдогч эх сурвалж)",
-    url: "https://wikipedia.com/wiki/Bhopal_tragedy",
-  },
-  {
-    id: "[15]",
-    title: "Engineers Canada — Six regulators celebrate centennials in 2020",
-    url: "https://engineerscanada.ca/news-and-events/news/six-regulators-celebrate-centennials-in-2020",
-  },
-  {
-    id: "[16]",
-    title: "Engineers Canada — Ethics and engineering",
-    url: "https://engineerscanada.ca/news-and-events/news/ethics-and-engineering",
-  },
-  {
-    id: "[17]",
-    title: "Engineers Canada — Public guideline on the code of ethics (2016)",
-    url: "https://engineerscanada.ca/publications/public-guideline-on-the-code-of-ethics",
-  },
-  {
-    id: "[18]",
-    title: "APEGS (Saskatchewan) — Act review: overview and proposed changes",
-    url: "https://www.apegs.ca/assets/the-engineering-and-geoscience-professions-act-review-overview-and-proposed-changes.pdf",
-  },
-];
-
-const tableHead = [
-  "Үзүүлэлт",
-  "БНСУ",
-  "Франц (UNAFIC / IESF)",
-  "Канад (Engineers Canada / муж)",
-];
-
-const tableRows: string[][] = [
-  [
-    "Үндэсний байгууллага",
-    "KIChE (1962) [1]",
-    "UNAFIC (1910) / IESF [2][3]",
-    "Engineers Canada (1936) [7]",
-  ],
-  [
-    "Статус",
-    "Мэргэжлийн нийгэмлэг [1]",
-    "Төгсөгчдийн холбоодын нэгдэл [2]",
-    "Мужийн зохицуулагчдын нэгдэл [7]",
-  ],
-  [
-    "Лиценз олгох эрх",
-    NO_INFO,
-    NO_INFO,
-    "Мужийн зохицуулагч (жишээ нь PEO) [8]",
-  ],
-  [
-    "Ёс зүйн дүрэм",
-    "Судалгаа, хэвлэлийн ёс зүй [1][12]",
-    "Charte (2001), Charte ISR (2020-оос) [6][3]",
-    "Үндэсний удирдамж (2016, 2024) ба мужийн код [4][17]",
-  ],
-  [
-    "Заавал эсэх",
-    "Нийгэмлэгийн дотоод баримт [1][12]",
-    "Сайн дурын [6]",
-    "Мужийн код заавал; үндэсний удирдамж сайн дурын [8][16]",
-  ],
-  [
-    "Санкц",
-    "Анхааруулга ... гишүүнчлэл түдгэлзүүлэх [1][12]",
-    "Эрүүгийн хууль 121-3 [5]; сахилгын систем: " + NO_INFO,
-    "Лиценз түдгэлзүүлэх, цуцлах, торгууль (BC: $100,000 хүртэл) [9]",
-  ],
-  [
-    "Эрсдэл мэдээлэх",
-    NO_INFO,
-    "Захиалагчид эрсдэл мэдээлэх зарчим [3]",
-    "Duty to report: заавал ба сайн дурын [11]",
-  ],
-];
-
-/* ------------------------------------------------------------------ */
-/* 3D hourglass-ын байрлалууд                                          */
-/* ------------------------------------------------------------------ */
-
-const POSES: SlideState[] = [
-  { x: 0.84, y: 0.56, s: 0.33, rx: 0.3, rz: -0.2, o: 0.65 },
-  { x: 0.86, y: 0.58, s: 0.32, rx: -0.28, rz: 0.3, o: 0.65 },
-  { x: 0.85, y: 0.55, s: 0.34, rx: 0.2, rz: 0.25, o: 0.65 },
-];
-const POSE_HERO: SlideState = {
-  x: 0.7,
-  y: 0.02,
-  s: 1.0,
-  rx: 0.16,
-  rz: -0.15,
-  o: 0.85,
-};
-const POSE_FAINT: SlideState = {
-  x: 0,
-  y: 0,
-  s: 1.45,
-  rx: 0.04,
-  rz: 0,
-  o: 0.12,
-};
 
 const poseFor = (i: number): SlideState => {
-  const p = slides[i]?.pose;
-  if (p === "hero") return POSE_HERO;
-  if (p === "faint") return POSE_FAINT;
-  return POSES[i % POSES.length];
+  const s = slides[i];
+  if (!s) return POSE_FAINT;
+  if (s.kind === "cover") return POSE_INTRO;
+  if (s.kind === "case" || s.kind === "list") return POSE_CORNER[i % 2];
+  return POSE_FAINT;
 };
 
-const toneColor = (tone?: Card["tone"]) =>
-  tone === "accent"
-    ? "var(--accent)"
-    : tone === "warn"
-      ? "#b8612f"
-      : tone === "ink"
-        ? "var(--ink)"
-        : undefined;
-
 /* ------------------------------------------------------------------ */
-/* CSS: слайд бүр нэг дэлгэцэнд багтана                                */
+/* Text: [n] ишлэл, "мэдээлэл олдсонгүй" тэмдэглэгээ                   */
 /* ------------------------------------------------------------------ */
 
-const fitCss = `
-html,body{height:100%;overflow:hidden}
-.slides-wrapper{position:fixed;inset:0;overflow:hidden}
-.slides-wrapper main{position:absolute;inset:0;overflow:hidden}
-.slides-wrapper main .slide{
-  position:absolute;inset:0;box-sizing:border-box;overflow:hidden;
-  display:flex;align-items:center;
-  padding:clamp(64px,11vh,100px) clamp(20px,5vw,80px) clamp(64px,11vh,100px);
-}
-.slides-wrapper main .slide:not(.on){visibility:hidden;opacity:0;pointer-events:none}
-.slides-wrapper main .slide.on{visibility:visible;opacity:1;pointer-events:auto}
-
-.slide-grid{
-  width:100%;height:100%;min-height:0;display:grid;
-  grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
-  gap:clamp(20px,4vw,64px);align-items:center;
-}
-.slide-grid.no-visual{grid-template-columns:minmax(0,1fr)}
-
-.content-side{min-width:0;max-height:100%;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
-.content-side .serif-title{font-size:clamp(28px,5.2vh,56px)!important;line-height:1.1!important;margin:.35em 0 .3em!important}
-.content-side .serif-sub{font-size:clamp(15px,2.2vh,21px)!important;line-height:1.4!important;margin:0 0 1.4vh!important}
-.content-side .points-list{margin:0!important}
-.content-side .point-row{display:flex;gap:14px;align-items:flex-start;padding:1.1vh 0!important;margin:0!important}
-.content-side .point-text{font-size:clamp(16px,2.2vh,21px);line-height:1.4}
-
-.visual-side{min-width:0;height:100%;max-height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.photo-frame{position:relative;width:100%;height:min(100%,72vh);border-radius:14px;overflow:hidden}
-.photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
-.photo-badge{position:absolute;top:12px;left:12px;padding:6px 10px;border-radius:999px;background:rgba(20,40,34,.85);color:#fff;font-size:12px;letter-spacing:.06em}
-.photo-source{position:absolute;left:12px;bottom:10px;right:12px;font-size:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-
-.paper-card-stack{width:100%;display:flex;flex-direction:column;gap:1.4vh;max-height:100%}
-.paper-card{padding:1.6vh 18px;border-radius:12px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.08);border-left-width:3px}
-.card-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:.6vh}
-.card-title{font-weight:600;font-size:clamp(15px,2.2vh,20px);line-height:1.25}
-.card-pill{font-size:11px;letter-spacing:.05em;padding:3px 8px;border-radius:999px;background:rgba(20,40,34,.1);white-space:nowrap}
-.card-desc{margin:0;font-size:clamp(14px,2vh,18px);line-height:1.4}
-.principle-grid{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:1.4vh 14px}
-.principle-tile{padding:1.8vh 16px;border-radius:12px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;gap:.6vh}
-.principle-num{font-size:clamp(12px,1.8vh,15px);opacity:.6;letter-spacing:.08em}
-.principle-name{font-weight:600;font-size:clamp(16px,2.4vh,22px);line-height:1.2}
-
-.paper-table-wrap{max-height:60vh;overflow:auto;margin-top:1.2vh}
-.paper-table{width:100%;min-width:680px;border-collapse:collapse;font-size:clamp(13px,1.9vh,17px)}
-.paper-table th,.paper-table td{padding:1vh 10px;border-bottom:1px solid rgba(0,0,0,.12);text-align:left;vertical-align:top;line-height:1.3}
-
-.refs-columns{columns:2;column-gap:32px;margin-top:1.2vh;font-size:clamp(12px,1.9vh,15px);line-height:1.3;max-height:64vh;overflow:auto}
-.ref-item{break-inside:avoid;margin-bottom:1vh}
-.ref-idx{font-weight:700;margin-right:6px}
-
-/* Жижиг дэлгэц (утас, намхан цонх): агуулга таслагдахын оронд дотроо гүйлгэнэ */
-@media (max-width:820px), (max-height:560px){
-  .slides-wrapper main .slide{overflow-y:auto;align-items:flex-start}
-  .slide-grid{height:auto;margin-block:auto;grid-template-columns:minmax(0,1fr);gap:16px}
-  .content-side{max-height:none;overflow:visible}
-  .visual-side{height:auto;max-height:none;overflow:visible}
-  .photo-frame{height:30vh}
-  .principle-grid{grid-template-columns:1fr}
-  .refs-columns{columns:1;max-height:none}
+function T({ text }: { text: string }) {
+  const parts = text.split(/(\s?(?:\[\d+\])+|Баталгаатай мэдээлэл олдсонгүй)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        !p ? null : /^\s?\[/.test(p) ? (
+          <span className="b2-ref" key={i}>
+            {p.trim()}
+          </span>
+        ) : p === NO_INFO ? (
+          <span className="b2-na" key={i}>
+            {p}
+          </span>
+        ) : (
+          <Fragment key={i}>{p}</Fragment>
+        ),
+      )}
+    </>
+  );
 }
 
-/* PDF хэвлэх: слайд бүр нэг хуудас */
-@media print{
-  @page{size:landscape;margin:0}
-  html,body{height:auto;overflow:visible}
-  .slides-wrapper,.slides-wrapper main{position:static;overflow:visible}
-  .slides-wrapper main .slide{
-    position:relative!important;visibility:visible!important;opacity:1!important;
-    transform:none!important;pointer-events:auto;overflow:hidden;
-    height:100vh;break-after:page;page-break-after:always;
+/* ------------------------------------------------------------------ */
+/* Small pieces                                                        */
+/* ------------------------------------------------------------------ */
+
+function Title({ html }: { html: string }) {
+  return <h1 className="b3-title" dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+function Head({ s }: { s: Slide }) {
+  const g = GROUPS[s.group];
+  return (
+    <>
+      <div className="b3-head">
+        {g.code && <span className="b3-flag">{g.code}</span>}
+        <div className="tag" style={{ marginBottom: 0 }}>
+          {s.tag}
+        </div>
+      </div>
+      {s.step !== undefined && (
+        <ol className="b3-steps" aria-label={g.name}>
+          {g.steps.map((st, i) => (
+            <li
+              key={st}
+              className={i === s.step ? "on" : i < (s.step ?? 0) ? "done" : ""}
+            >
+              {st}
+            </li>
+          ))}
+        </ol>
+      )}
+      <Title html={s.title} />
+    </>
+  );
+}
+
+function Sub({ s }: { s: Slide }) {
+  return s.sub ? (
+    <p className="b3-sub">
+      <T text={s.sub} />
+    </p>
+  ) : null;
+}
+
+function PhotoFrame({ p }: { p: Photo }) {
+  return (
+    <figure className="b3-photo">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={p.src} alt={p.alt} />
+      <span className="b3-photo-badge">{p.badge}</span>
+      <figcaption>{p.credit}</figcaption>
+    </figure>
+  );
+}
+
+function Facts({ items }: { items: IconItem[] }) {
+  return (
+    <ul className="b3-facts">
+      {items.map((f) => {
+        const Icon = f.icon;
+        return (
+          <li key={f.text + (f.bold ?? "")} className={f.muted ? "b2-muted" : ""}>
+            <Icon size={18} strokeWidth={1.8} />
+            <span>
+              {f.bold && <b>{f.bold} </b>}
+              <T text={f.text} />
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function Card({ c, n }: { c: CardItem; n?: number }) {
+  const Icon = c.icon;
+  return (
+    <div className={`b2-card ${c.tone ?? ""}`}>
+      <div className="b2-card-top">
+        <span className="b2-card-icon">
+          <Icon size={26} strokeWidth={1.5} />
+        </span>
+        {(c.pill || n !== undefined) && (
+          <span className="b2-card-pill">{c.pill ?? `0${n}`}</span>
+        )}
+      </div>
+      <div className="b2-card-title">{c.title}</div>
+      <p className="b2-card-desc">
+        <T text={c.desc} />
+      </p>
+      {c.extra && (
+        <p className="b2-card-extra">
+          <T text={c.extra} />
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Slide bodies                                                        */
+/* ------------------------------------------------------------------ */
+
+function SlideBody({ s }: { s: Slide }) {
+  switch (s.kind) {
+    case "cover":
+      return (
+        <div className="b3-grid b3-intro">
+          <div className="b3-col">
+            <div className="tag">{s.tag}</div>
+            <Title html={s.title} />
+            <p className="b3-sub">{s.sub}</p>
+            <div className="b3-flow-label">Илтгэлийн бүтэц</div>
+            <ol className="b3-flow">
+              {["Бодит сургамж", ...GROUPS.slice(1).map((g) => g.name)].map((st, i) => (
+                <li key={st}>
+                  <b>0{i + 1}</b>
+                  {st}
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="b3-cases">
+            {COUNTRIES.map((c, i) => {
+              const Icon = c.icon;
+              return (
+                <div className="b3-case-card" key={c.code}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={c.img} alt="" />
+                  <div className="b3-case-info">
+                    <span className="b3-case-num">0{i + 1}</span>
+                    <div>
+                      <div className="b3-case-country">
+                        {c.name} · {c.year}
+                      </div>
+                      <div className="b3-case-name">{c.org}</div>
+                    </div>
+                    <span className="b3-case-icon">
+                      <Icon size={20} strokeWidth={1.6} />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+    case "case":
+      return (
+        <div className="b3-grid">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <div
+              className="b3-stats"
+              style={{ gridTemplateColumns: `repeat(${s.stats.length},minmax(0,1fr))` }}
+            >
+              {s.stats.map((st) => {
+                const Icon = st.icon;
+                return (
+                  <div className="b3-stat" key={st.num}>
+                    <Icon className="b3-stat-icon" size={20} strokeWidth={1.6} />
+                    <div className="b3-stat-num">{st.num}</div>
+                    <div className="b3-stat-label">
+                      <T text={st.label} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <Facts items={s.facts} />
+          </div>
+          <PhotoFrame p={s.photo} />
+        </div>
+      );
+
+    case "cards":
+      return (
+        <div className="b3-full">
+          <Head s={s} />
+          <Sub s={s} />
+          <div
+            className={`b2-cards n${s.cards.length}`}
+            style={{ gridTemplateColumns: `repeat(${s.cards.length},minmax(0,1fr))` }}
+          >
+            {s.cards.map((c) => (
+              <Card c={c} key={c.title} />
+            ))}
+          </div>
+          {s.note && (
+            <div className="b3-verdict">
+              <s.note.icon size={18} strokeWidth={2} />
+              <span>
+                <T text={s.note.text} />
+              </span>
+            </div>
+          )}
+        </div>
+      );
+
+    case "tiles":
+      return (
+        <div className="b3-full">
+          <Head s={s} />
+          <Sub s={s} />
+          <div className="b2-tiles">
+            {s.tiles.map((t, i) => {
+              const Icon = t.icon;
+              return (
+                <div className="b2-tile" key={t.text}>
+                  <span className="b2-tile-icon">
+                    <Icon size={24} strokeWidth={1.6} />
+                  </span>
+                  <span className="b2-tile-n">0{i + 1}</span>
+                  <span className="b2-tile-t">{t.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+    case "ladder":
+      return (
+        <div className="b3-grid b3-even">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <ol className="b2-ladder">
+              {s.rows.map((r, i) => {
+                const Icon = r.icon;
+                return (
+                  <li key={r.text}>
+                    <span className="b2-ladder-n">0{i + 1}</span>
+                    <span className="b2-ladder-icon">
+                      <Icon size={18} strokeWidth={1.8} />
+                    </span>
+                    <span className="b2-ladder-t">{r.text}</span>
+                    <span className="b2-ladder-bar">
+                      <i style={{ width: `${((i + 1) / s.rows.length) * 100}%` }} />
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            <div className="b2-ladder-axis">
+              <span>Хөнгөн</span>
+              <span>Хүнд</span>
+            </div>
+          </div>
+          <div className="b3-law">
+            <div className="b3-law-top">
+              <CircleHelp size={22} strokeWidth={1.5} />
+              <span>Хамрах хүрээнээс гадуур</span>
+            </div>
+            <div className="b2-side-q">?</div>
+            <div className="b3-law-name">{s.side.label}</div>
+            <div className="b2-side-na">{s.side.text}</div>
+          </div>
+        </div>
+      );
+
+    case "org":
+      return (
+        <div className="b3-grid b3-even">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <div className="b2-year">
+              <div className="b2-year-num">{s.year}</div>
+              <p>
+                <T text={s.yearText} />
+              </p>
+            </div>
+          </div>
+          <div className="b2-org">
+            <div className="b2-org-root">
+              <Landmark size={18} strokeWidth={1.7} />
+              {s.root}
+            </div>
+            {s.nodes.map((n) => (
+              <Fragment key={n.title}>
+                <span className="b2-org-line" aria-hidden="true" />
+                <Card c={n} />
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "list":
+      return (
+        <div className="b3-grid">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <ol className="b3-recs">
+              {s.items.map((it, i) => {
+                const Icon = it.icon;
+                return (
+                  <li key={it.text} className={it.sub ? "b2-hl" : ""}>
+                    <span className="b3-rec-icon">
+                      <Icon size={18} strokeWidth={1.7} />
+                    </span>
+                    <span className="b3-rec-n">{i + 1}</span>
+                    <div>
+                      <div className="b3-rec-t">
+                        {it.bold && <b>{it.bold}. </b>}
+                        <T text={it.text} />
+                      </div>
+                      {it.sub && (
+                        <div className="b3-rec-s">
+                          <T text={it.sub} />
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+            {s.foot && (
+              <p className="b3-src">
+                <T text={s.foot} />
+              </p>
+            )}
+          </div>
+          <PhotoFrame p={s.photo} />
+        </div>
+      );
+
+    case "versus":
+      return (
+        <div className="b3-full">
+          <Head s={s} />
+          <Sub s={s} />
+          <div className="b2-vs">
+            {[s.a, s.b].map((c, i) => {
+              const Icon = c.icon;
+              return (
+                <Fragment key={c.title}>
+                  {i === 1 && <span className="b2-vs-disc">vs</span>}
+                  <div className={`b2-vs-card ${c.tone ?? ""}`}>
+                    <div className="b2-card-top">
+                      <span className="b2-card-icon">
+                        <Icon size={26} strokeWidth={1.5} />
+                      </span>
+                      <span className="b2-card-pill">{c.pill}</span>
+                    </div>
+                    <div className="b2-vs-name">{c.title}</div>
+                    <div className="b2-vs-kind">{c.desc}</div>
+                    {c.extra && (
+                      <p className="b2-vs-text">
+                        <T text={c.extra} />
+                      </p>
+                    )}
+                  </div>
+                </Fragment>
+              );
+            })}
+          </div>
+          <div className="b3-verdict">
+            <span>{s.note}</span>
+          </div>
+        </div>
+      );
+
+    case "timeline":
+      return (
+        <div className="b3-full">
+          <Head s={s} />
+          <Sub s={s} />
+          <ol className="b2-tl">
+            {s.events.map((e) => (
+              <li key={e.year}>
+                <span className="b2-tl-dot" />
+                <div className="b2-tl-year">{e.year}</div>
+                <div className="b2-tl-title">{e.title}</div>
+                <p className="b2-tl-desc">
+                  <T text={e.desc} />
+                </p>
+              </li>
+            ))}
+          </ol>
+          <div className="b2-tl-facts">
+            <Facts items={s.facts} />
+          </div>
+        </div>
+      );
+
+    case "tiers":
+      return (
+        <div className="b3-grid b3-even">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <Facts items={s.facts} />
+          </div>
+          <div className="b2-tiers">
+            {s.tiers.map((t, i) => (
+              <Fragment key={t.title}>
+                {i > 0 && (
+                  <span className="b2-tier-arrow" aria-hidden="true">
+                    <ArrowDown size={18} strokeWidth={1.8} />
+                  </span>
+                )}
+                <Card c={t} />
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "money":
+      return (
+        <div className="b3-grid b3-even">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <Facts items={s.facts} />
+          </div>
+          <div className="b3-law">
+            <div className="b3-law-top">
+              <Landmark size={22} strokeWidth={1.5} />
+              <span>{s.panelLabel}</span>
+            </div>
+            <div className="b2-money">
+              {s.figures.map((f) => (
+                <div key={f.num}>
+                  <div className="b2-money-num">{f.num}</div>
+                  <div className="b2-money-label">
+                    <T text={f.label} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
+    case "table":
+      return (
+        <div className="b3-full b2-wide">
+          <Head s={s} />
+          <Sub s={s} />
+          <div className="b2-table-wrap">
+            <table className="b2-table">
+              <thead>
+                <tr>
+                  {tableHead.map((h, i) => (
+                    <th key={h}>
+                      {i > 0 && <span className="b3-flag">{COUNTRIES[i - 1].code}</span>}
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tableRows.map((row) => (
+                  <tr key={row[0]}>
+                    {row.map((cell, ci) =>
+                      ci === 0 ? (
+                        <th key={ci} scope="row">
+                          {cell}
+                        </th>
+                      ) : (
+                        <td key={ci}>
+                          <T text={cell} />
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+
+    case "compare":
+      return (
+        <div className="b3-full">
+          <Head s={s} />
+          <Sub s={s} />
+          <div className="b2-cmp">
+            {s.countries.map((c) => (
+              <div className="b2-cmp-card" key={c.code}>
+                <div className="b2-cmp-top">
+                  <span className="b3-flag">{c.code}</span>
+                  <b>{c.name}</b>
+                  <span className="b2-card-pill">{c.pill}</span>
+                </div>
+                <p>
+                  <T text={c.desc} />
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="b2-cmp-points">
+            {s.points.map((p) => {
+              const Icon = p.icon;
+              return (
+                <div key={p.bold}>
+                  <div className="b2-cmp-ph">
+                    <Icon size={18} strokeWidth={1.8} />
+                    {p.bold}
+                  </div>
+                  <p>
+                    <T text={p.text} />
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+    case "lessons":
+      return (
+        <div className="b3-grid b3-even">
+          <div className="b3-col">
+            <Head s={s} />
+            <Sub s={s} />
+            <ol className="b2-lessons">
+              {s.items.map((it, i) => (
+                <li key={it.bold}>
+                  <span className="b2-lesson-n">{i + 1}</span>
+                  <div>
+                    <div className="b2-lesson-t">{it.bold}</div>
+                    <p>
+                      <T text={it.text} />
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="b2-actors">
+            <div className="b3-law-top">Хэн юу хийх вэ · санал</div>
+            {s.actors.map((a) => {
+              const Icon = a.icon;
+              return (
+                <div className="b2-actor" key={a.title}>
+                  <span className="b2-actor-icon">
+                    <Icon size={20} strokeWidth={1.6} />
+                  </span>
+                  <div>
+                    <b>{a.title}</b>
+                    <p>{a.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+    case "refs":
+      return (
+        <div className="b3-full b2-wide">
+          <Head s={s} />
+          <Sub s={s} />
+          <ol className="b2-refs">
+            {referencesList.map((r) => (
+              <li key={r.id}>
+                <span className="b2-ref-id">{r.id}</span>
+                <a href={r.url} target="_blank" rel="noopener noreferrer">
+                  {r.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      );
   }
-  canvas,.grain,.curtain,.wipe,.progress,.chrome{display:none!important}
+}
+
+/* ------------------------------------------------------------------ */
+/* CSS (b3-ийн нийтлэг загвар дээр нэмэгдэл)                           */
+/* ------------------------------------------------------------------ */
+
+const css = `
+.b2-ref{font-family:var(--mono);font-size:.68em;color:var(--mute);margin-left:.25em;letter-spacing:0;white-space:nowrap;font-style:normal;font-weight:400}
+.b2-na{font-style:italic;color:var(--mute)}
+.b3-facts li.b2-muted{color:var(--ink-2)}
+.b3-facts li.b2-muted svg{color:var(--mute)}
+.b3-facts b,.b3-rec-t b{font-weight:600}
+.b2-wide{max-width:1400px}
+
+/* cards */
+.b2-cards{display:grid;gap:clamp(12px,1.8vw,26px);margin-top:1vh}
+.b2-card{position:relative;display:flex;flex-direction:column;padding:clamp(18px,3.4vh,36px) clamp(16px,1.8vw,28px);border-radius:16px;
+  background:rgba(255,255,255,.5);border:1px solid var(--rule);backdrop-filter:blur(4px);min-height:clamp(200px,34vh,340px)}
+.b2-card.ink{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.b2-card.accent{background:var(--accent-soft);border-color:rgba(184,97,47,.35)}
+.b2-card.warn{background:transparent;border:1.5px dashed rgba(184,97,47,.55)}
+.b2-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:auto}
+.b2-card-icon{display:inline-grid;place-items:center;width:clamp(48px,7.4vh,62px);height:clamp(48px,7.4vh,62px);border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);flex-shrink:0}
+.b2-card.ink .b2-card-icon{background:rgba(243,237,226,.1);color:#e7a477}
+.b2-card-pill{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--accent);padding-top:4px;text-align:right}
+.b2-card.ink .b2-card-pill{color:#e7a477}
+.b2-card-title{font-family:var(--serif);font-size:clamp(22px,3.5vh,34px);line-height:1.1;margin-top:2.4vh;color:inherit}
+.b2-card-desc{font-size:clamp(14px,1.95vh,17.5px);line-height:1.42;margin-top:1.2vh;color:inherit;opacity:.9}
+.b2-card-extra{font-family:var(--serif);font-style:italic;font-size:clamp(15px,2.1vh,19px);line-height:1.35;margin-top:1.6vh;padding-top:1.4vh;
+  border-top:1px solid var(--rule);color:var(--ink-2)}
+.b2-card.ink .b2-card-extra{border-color:rgba(243,237,226,.18);color:rgba(243,237,226,.85)}
+.b2-cards.n4 .b2-card-title{font-size:clamp(20px,3vh,28px)}
+.b2-cards.n2 .b2-card{min-height:clamp(200px,30vh,300px)}
+.b2-cards.n2 .b2-card-title{font-size:clamp(24px,4.2vh,40px)}
+
+/* tiles */
+.b2-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.8vw,22px);margin-top:1vh}
+.b2-tile{position:relative;display:flex;flex-direction:column;gap:1.6vh;padding:clamp(18px,3.2vh,32px) clamp(16px,1.8vw,26px);border-radius:16px;
+  background:rgba(255,255,255,.5);border:1px solid var(--rule);backdrop-filter:blur(4px)}
+.b2-tile:nth-child(1),.b2-tile:nth-child(6){background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.b2-tile-icon{display:inline-grid;place-items:center;width:clamp(44px,6.6vh,56px);height:clamp(44px,6.6vh,56px);border-radius:50%;background:var(--accent-soft);color:var(--accent)}
+.b2-tile:nth-child(1) .b2-tile-icon,.b2-tile:nth-child(6) .b2-tile-icon{background:rgba(243,237,226,.1);color:#e7a477}
+.b2-tile-n{position:absolute;top:clamp(16px,2.8vh,28px);right:22px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent)}
+.b2-tile:nth-child(1) .b2-tile-n,.b2-tile:nth-child(6) .b2-tile-n{color:#e7a477}
+.b2-tile-t{font-family:var(--serif);font-size:clamp(21px,3.4vh,32px);line-height:1.12}
+
+/* ladder */
+.b2-ladder{list-style:none;display:flex;flex-direction:column;margin-top:.6vh}
+.b2-ladder li{display:grid;grid-template-columns:28px 38px 1fr minmax(80px,28%);gap:12px;align-items:center;padding:1.5vh 0;border-bottom:1px solid var(--rule)}
+.b2-ladder-n{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--mute)}
+.b2-ladder-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+.b2-ladder-t{font-size:clamp(15px,2.15vh,19px);font-weight:500;color:var(--ink)}
+.b2-ladder-bar{height:6px;border-radius:6px;background:rgba(21,49,42,.08);overflow:hidden}
+.b2-ladder-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#e7a477,var(--accent))}
+.b2-ladder-axis{display:flex;justify-content:flex-end;gap:calc(28% - 60px);font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mute);margin-top:1vh}
+.b2-side-q{font-family:var(--serif);font-size:clamp(80px,16vh,170px);line-height:.85;margin-top:2vh;color:#e7a477}
+.b2-side-na{font-family:var(--serif);font-style:italic;font-size:clamp(16px,2.3vh,22px);opacity:.75;border-top:1px solid rgba(243,237,226,.18);padding-top:2vh}
+
+/* org */
+.b2-year{margin-top:1vh;border-top:1.5px solid var(--ink);padding-top:2vh;max-width:540px}
+.b2-year-num{font-family:var(--serif);font-size:clamp(70px,15vh,160px);line-height:.85;letter-spacing:-.03em;color:var(--ink)}
+.b2-year p{font-size:clamp(15px,2.15vh,19px);line-height:1.4;color:var(--ink-2);margin-top:3vh}
+.b2-org{display:flex;flex-direction:column;align-items:stretch}
+.b2-org-root{align-self:center;display:inline-flex;align-items:center;gap:10px;padding:1.4vh 26px;border-radius:999px;background:var(--accent);color:#fff;
+  font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.12em}
+.b2-org-line{align-self:center;width:1.5px;height:2.6vh;background:var(--ink-2);opacity:.5}
+.b2-org .b2-card{min-height:0}
+.b2-org .b2-card-top{margin-bottom:0}
+.b2-org .b2-card-title{margin-top:1.4vh;font-size:clamp(20px,3vh,28px)}
+
+/* versus */
+.b2-vs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:clamp(12px,1.6vw,22px);align-items:stretch;margin-top:1vh}
+.b2-vs-card{display:flex;flex-direction:column;padding:clamp(20px,3.6vh,40px) clamp(18px,2.2vw,34px);border-radius:16px;
+  background:rgba(255,255,255,.5);border:1px solid var(--rule);backdrop-filter:blur(4px)}
+.b2-vs-card.ink{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.b2-vs-card.ink .b2-card-icon{background:rgba(243,237,226,.1);color:#e7a477}
+.b2-vs-card.ink .b2-card-pill{color:#e7a477}
+.b2-vs-name{font-family:var(--serif);font-size:clamp(44px,9vh,92px);line-height:.95;letter-spacing:-.02em;margin-top:2.4vh}
+.b2-vs-kind{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-top:1vh}
+.b2-vs-card.ink .b2-vs-kind{color:#e7a477}
+.b2-vs-text{font-size:clamp(15px,2.1vh,19px);line-height:1.42;margin-top:2vh;opacity:.92}
+.b2-vs-disc{align-self:center;display:grid;place-items:center;width:clamp(46px,7vh,60px);height:clamp(46px,7vh,60px);border-radius:50%;
+  border:1.5px solid var(--accent);color:var(--accent);font-family:var(--serif);font-style:italic;font-size:clamp(20px,3vh,26px);background:var(--paper)}
+
+/* timeline */
+.b2-tl{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,2vw,28px);margin-top:2.4vh;position:relative}
+.b2-tl::before{content:"";position:absolute;left:0;right:0;top:7px;height:1.5px;background:var(--ink);opacity:.35}
+.b2-tl li{position:relative;padding-top:3.4vh}
+.b2-tl-dot{position:absolute;top:0;left:0;width:16px;height:16px;border-radius:50%;background:var(--paper);border:2px solid var(--accent)}
+.b2-tl li:nth-child(2) .b2-tl-dot{background:var(--accent)}
+.b2-tl-year{font-family:var(--serif);font-size:clamp(42px,8.4vh,86px);line-height:.9;letter-spacing:-.02em;color:var(--ink)}
+.b2-tl-title{font-weight:600;font-size:clamp(15px,2.2vh,19px);margin-top:1.2vh;color:var(--ink)}
+.b2-tl-desc{font-size:clamp(13.5px,1.9vh,16.5px);line-height:1.4;color:var(--ink-2);margin-top:.6vh}
+.b2-tl-facts{margin-top:3.6vh;padding-top:2.2vh;border-top:1px solid var(--rule)}
+.b2-tl-facts .b3-facts{flex-direction:row;gap:clamp(16px,3vw,48px)}
+.b2-tl-facts .b3-facts li{flex:1}
+
+/* tiers */
+.b2-tiers{display:flex;flex-direction:column}
+.b2-tiers .b2-card{min-height:0}
+.b2-tiers .b2-card-title{margin-top:1.6vh}
+.b2-tier-arrow{align-self:center;display:grid;place-items:center;width:34px;height:34px;margin:-6px 0;z-index:1;border-radius:50%;
+  background:var(--paper);border:1px solid var(--rule);color:var(--accent)}
+
+/* money */
+.b2-money{display:grid;grid-template-columns:1fr 1fr;gap:3vh 24px;margin-top:3vh;border-top:1px solid rgba(243,237,226,.18);padding-top:3vh}
+.b2-money-num{font-family:var(--serif);font-size:clamp(30px,6vh,62px);line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.b2-money > div:nth-child(-n+2) .b2-money-num{color:#e7a477}
+.b2-money-label{font-size:clamp(12.5px,1.75vh,15px);opacity:.75;margin-top:.8vh;line-height:1.3}
+.b2-money-label .b2-ref{color:rgba(243,237,226,.6)}
+
+/* table */
+.b2-table-wrap{margin-top:.6vh;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:rgba(255,255,255,.5);backdrop-filter:blur(4px)}
+.b2-table{width:100%;border-collapse:collapse;font-size:clamp(12.5px,1.8vh,16px);line-height:1.32}
+.b2-table thead th{background:var(--ink);color:var(--paper);font-weight:600;text-align:left;padding:1.4vh 14px;font-size:.92em}
+.b2-table thead th .b3-flag{background:var(--accent);margin-right:8px}
+.b2-table tbody th{font-weight:600;text-align:left;color:var(--ink);width:17%}
+.b2-table tbody th,.b2-table td{padding:1.15vh 14px;border-top:1px solid var(--rule);vertical-align:top;color:var(--ink)}
+.b2-table tbody tr:nth-child(even){background:rgba(21,49,42,.03)}
+
+/* compare */
+.b2-cmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.8vw,24px);margin-top:1vh}
+.b2-cmp-card{padding:clamp(16px,2.8vh,28px) clamp(16px,1.8vw,26px);border-radius:16px;background:rgba(255,255,255,.5);border:1px solid var(--rule);backdrop-filter:blur(4px)}
+.b2-cmp-card:nth-child(3){background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.b2-cmp-card:nth-child(3) .b3-flag{background:var(--accent)}
+.b2-cmp-card:nth-child(3) .b2-card-pill{color:#e7a477}
+.b2-cmp-top{display:flex;align-items:center;gap:10px}
+.b2-cmp-top b{font-family:var(--serif);font-weight:400;font-size:clamp(22px,3.4vh,32px);flex:1}
+.b2-cmp-card p{font-size:clamp(14px,1.95vh,17.5px);line-height:1.42;margin-top:1.6vh}
+.b2-cmp-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.8vw,24px);margin-top:3vh;padding-top:2.4vh;border-top:1.5px solid var(--ink)}
+.b2-cmp-ph{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.b2-cmp-points p{font-size:clamp(14px,1.95vh,17.5px);line-height:1.42;color:var(--ink);margin-top:1vh}
+
+/* lessons */
+.b2-lessons{list-style:none;display:flex;flex-direction:column;margin-top:.6vh}
+.b2-lessons li{display:grid;grid-template-columns:auto 1fr;gap:clamp(14px,1.6vw,22px);align-items:start;padding:2vh 0;border-bottom:1px solid var(--rule)}
+.b2-lessons li:last-child{border-bottom:none}
+.b2-lesson-n{font-family:var(--serif);font-size:clamp(44px,8vh,80px);line-height:.8;color:var(--accent);min-width:.7em}
+.b2-lesson-t{font-family:var(--serif);font-size:clamp(21px,3.2vh,30px);line-height:1.1;color:var(--ink)}
+.b2-lessons p{font-size:clamp(14px,1.95vh,17.5px);line-height:1.42;color:var(--ink-2);margin-top:.8vh}
+.b2-actors{display:flex;flex-direction:column;gap:1.6vh;padding:clamp(22px,4vh,40px) clamp(20px,2.4vw,36px);border-radius:18px;
+  background:var(--ink);color:var(--paper);box-shadow:0 30px 60px -28px rgba(21,49,42,.6)}
+.b2-actor{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;padding-top:1.6vh;border-top:1px solid rgba(243,237,226,.18)}
+.b2-actor-icon{display:grid;place-items:center;width:clamp(42px,6.4vh,52px);height:clamp(42px,6.4vh,52px);border-radius:50%;background:rgba(243,237,226,.1);color:#e7a477}
+.b2-actor b{font-family:var(--serif);font-weight:400;font-size:clamp(20px,3vh,28px);line-height:1.1}
+.b2-actor p{font-size:clamp(13.5px,1.9vh,16.5px);line-height:1.4;opacity:.8;margin-top:.5vh}
+
+/* list highlight */
+.b3-recs li.b2-hl .b3-rec-icon{background:var(--ink);color:#e7a477}
+
+/* refs */
+.b2-refs{list-style:none;columns:2;column-gap:clamp(20px,3vw,48px);margin-top:.6vh;font-size:clamp(12.5px,1.75vh,15px);line-height:1.32}
+.b2-refs li{break-inside:avoid;display:grid;grid-template-columns:38px 1fr;gap:6px;padding:.75vh 0;border-bottom:1px solid var(--rule)}
+.b2-ref-id{font-family:var(--mono);font-size:.86em;font-weight:600;color:var(--accent)}
+.b2-refs a{color:var(--ink);text-decoration:none}
+.b2-refs a:hover{color:var(--accent);text-decoration:underline}
+
+@media (max-width:900px),(max-height:560px){
+  .b2-cards,.b2-tiles,.b2-tl,.b2-cmp,.b2-cmp-points{grid-template-columns:minmax(0,1fr)!important}
+  .b2-card{min-height:0}
+  .b2-vs{grid-template-columns:minmax(0,1fr)}
+  .b2-vs-disc{justify-self:center}
+  .b2-tl::before{display:none}
+  .b2-tl-facts .b3-facts{flex-direction:column}
+  .b2-refs{columns:1}
+  .b2-table-wrap{overflow-x:auto}
+  .b2-table{min-width:680px}
+  .b2-ladder li{grid-template-columns:24px 38px 1fr}
+  .b2-ladder-bar,.b2-ladder-axis{display:none}
 }
 `;
 
 /* ------------------------------------------------------------------ */
-/* Component                                                           */
+/* Page                                                                */
 /* ------------------------------------------------------------------ */
 
+const names = slides.map((s) => s.name);
+const brandSub = (i: number) => GROUPS[slides[i]?.group ?? 0].name;
+const renderSlide = (i: number) => <SlideBody s={slides[i]} />;
+
 export default function Home() {
-  const [index, setIndex] = useState(0);
-  const [isBusy, setIsBusy] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const curtainRef = useRef<HTMLDivElement>(null);
-  const curtainCountRef = useRef<HTMLDivElement>(null);
-  const curtainNameRef = useRef<HTMLDivElement>(null);
-  const wipeRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
-  const slideContainerRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-
-  const hourglassRef = useRef<{
-    onChange: (d: number) => void;
-    destroy: () => void;
-  } | null>(null);
-  const indexRef = useRef(index);
-  indexRef.current = index;
-
-  // 3D HOURGLASS BACKGROUND
-  useEffect(() => {
-    const canvas = document.getElementById("gl") as HTMLCanvasElement | null;
-    if (!canvas) return;
-
-    const instance = initHourglass(canvas, () => {
-      const s = poseFor(indexRef.current);
-      if (typeof window !== "undefined" && window.innerWidth < 768) {
-        return { x: 0, y: 0.65, s: 0.32, rx: s.rx, rz: s.rz, o: 0.16 };
-      }
-      return s;
-    });
-
-    hourglassRef.current = instance;
-    return () => {
-      instance.destroy();
-    };
-  }, []);
-
-  // CURTAIN & WIPE TRANSITION
-  const goToSlide = useCallback(
-    (targetIndex: number) => {
-      if (
-        targetIndex === index ||
-        isBusy ||
-        targetIndex < 0 ||
-        targetIndex >= slides.length
-      )
-        return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const gsap = (window as any).gsap;
-
-      const dir = targetIndex > index ? 1 : -1;
-      const targetSlide = slides[targetIndex];
-
-      hourglassRef.current?.onChange(dir);
-
-      const reduceMotion =
-        typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-      if (!gsap || reduceMotion) {
-        setIndex(targetIndex);
-        return;
-      }
-
-      setIsBusy(true);
-
-      const curtain = curtainRef.current;
-      const cc = curtainCountRef.current;
-      const cn = curtainNameRef.current;
-      const wipe = wipeRef.current;
-      const container = slideContainerRef.current;
-
-      const currentSlideEl = container?.children[index] as
-        | HTMLElement
-        | undefined;
-
-      if (curtain && cc && cn) {
-        cc.textContent = `${String(targetIndex + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
-        cn.innerHTML = `<span>${targetSlide.name}</span>`;
-
-        const from = dir > 0 ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 100% 0%)";
-        const to = dir > 0 ? "inset(0% 0% 100% 0%)" : "inset(100% 0% 0% 0%)";
-
-        const tl = gsap.timeline({
-          onComplete: () => {
-            setIsBusy(false);
-          },
-        });
-
-        if (currentSlideEl) {
-          tl.to(
-            currentSlideEl,
-            { y: -50 * dir, opacity: 0.15, duration: 0.42, ease: "power3.in" },
-            0,
-          );
-        }
-
-        tl.fromTo(
-          curtain,
-          { clipPath: from },
-          {
-            clipPath: "inset(0% 0% 0% 0%)",
-            duration: 0.48,
-            ease: "power3.inOut",
-          },
-          0,
-        )
-          .fromTo(
-            cn.querySelector("span"),
-            { yPercent: 110 * dir, rotate: 3 * dir },
-            { yPercent: 0, rotate: 0, duration: 0.6, ease: "expo.out" },
-            0.18,
-          )
-          .fromTo(
-            cc,
-            { opacity: 0, x: -16 },
-            { opacity: 0.65, x: 0, duration: 0.4, ease: "expo.out" },
-            0.22,
-          )
-          .add(() => {
-            setIndex(targetIndex);
-            if (container) {
-              gsap.set(container.children, { clearProps: "transform,opacity" });
-            }
-          }, 0.6)
-          .to(
-            cn.querySelector("span"),
-            { yPercent: -110 * dir, duration: 0.38, ease: "power3.in" },
-            0.66,
-          )
-          .to(
-            curtain,
-            { clipPath: to, duration: 0.55, ease: "power3.inOut" },
-            0.78,
-          );
-
-        if (wipe) {
-          gsap.fromTo(
-            wipe,
-            {
-              top: "50%",
-              opacity: 1,
-              scaleX: 0,
-              transformOrigin: dir > 0 ? "100% 50%" : "0% 50%",
-            },
-            { scaleX: 1, duration: 0.45, ease: "expo.inOut" },
-          );
-          gsap.to(wipe, { opacity: 0, duration: 0.3, delay: 0.45 });
-        }
-      } else {
-        setIndex(targetIndex);
-        setIsBusy(false);
-      }
-    },
-    [index, isBusy],
-  );
-
-  // Progress bar
-  useEffect(() => {
-    if (progressRef.current) {
-      progressRef.current.style.transform = `scaleX(${index / (slides.length - 1)})`;
-    }
-  }, [index]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (["ArrowRight", "Space", "PageDown"].includes(e.code)) {
-        e.preventDefault();
-        goToSlide(index + 1);
-      } else if (["ArrowLeft", "PageUp"].includes(e.code)) {
-        e.preventDefault();
-        goToSlide(index - 1);
-      } else if (e.key.toLowerCase() === "f") {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen?.();
-        } else {
-          document.exitFullscreen?.();
-        }
-      } else if (e.key === "Home") {
-        goToSlide(0);
-      } else if (e.key === "End") {
-        goToSlide(slides.length - 1);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToSlide, index]);
-
-  // Fullscreen state listener
-  useEffect(() => {
-    const handleFs = () => setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", handleFs);
-    return () => document.removeEventListener("fullscreenchange", handleFs);
-  }, []);
-
   return (
-    <div
-      className="slides-wrapper"
-      onTouchStart={(e) => {
-        touchStartX.current = e.changedTouches[0].clientX;
-      }}
-      onTouchEnd={(e) => {
-        const diff = e.changedTouches[0].clientX - touchStartX.current;
-        if (Math.abs(diff) > 50) goToSlide(index + (diff < 0 ? 1 : -1));
-      }}
-    >
-      <style dangerouslySetInnerHTML={{ __html: fitCss }} />
-      <canvas id="gl" aria-hidden="true" />
-      <div className="grain" aria-hidden="true" />
-
-      {/* INK CURTAIN TRANSITION */}
-      <div className="curtain" ref={curtainRef} aria-hidden="true">
-        <div className="cc" ref={curtainCountRef}>
-          {`01 / ${String(slides.length).padStart(2, "0")}`}
-        </div>
-        <div className="cn" ref={curtainNameRef}>
-          <span>Нүүр</span>
-        </div>
-      </div>
-
-      <div className="wipe" ref={wipeRef} aria-hidden="true" />
-      <div className="progress" ref={progressRef} />
-
-      {/* TOP CHROME BAR */}
-      <header className="chrome top">
-        <div className="deck-nav-pills">
-          <Link href="/" className="deck-pill active">
-            02 · ХАРЬЦУУЛСАН СУДАЛГАА
-          </Link>
-          <Link href="/biydalt3" className="deck-pill">
-            03 · КЕЙС ШИНЖИЛГЭЭ
-          </Link>
-        </div>
-      </header>
-
-      {/* SLIDES */}
-      <main ref={slideContainerRef}>
-        {slides.map((s, idx) => {
-          const isTable = s.layout === "table";
-          const isRefs = s.layout === "refs";
-          const hasVisual =
-            !isTable && !isRefs && Boolean(s.imageSrc || s.cards || s.tiles);
-
-          return (
-            <section
-              key={idx}
-              className={`slide ${idx === index ? "on" : ""}`}
-              aria-hidden={idx !== index}
-            >
-              <div className={`slide-grid ${hasVisual ? "" : "no-visual"}`}>
-                {/* Зүүн тал: гарчиг, цэгүүд */}
-                <div className="content-side">
-                  <div className="tag">{s.tag}</div>
-
-                  <h1
-                    className="serif-title"
-                    dangerouslySetInnerHTML={{ __html: s.titleHtml }}
-                  />
-
-                  {s.sub && <p className="serif-sub">{s.sub}</p>}
-
-                  {s.points && (
-                    <div className="points-list">
-                      {s.points.map((pt, pIdx) => (
-                        <div className="point-row" key={pIdx}>
-                          <span className="point-bullet">0{pIdx + 1}</span>
-                          <div className="point-body">
-                            <div className="point-text">
-                              <b>{pt.bold}</b> {pt.text}
-                              {pt.ref ? <> {pt.ref}</> : null}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {isTable && (
-                    <div className="paper-table-wrap">
-                      <table className="paper-table">
-                        <thead>
-                          <tr>
-                            {tableHead.map((h) => (
-                              <th key={h}>{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tableRows.map((row) => (
-                            <tr key={row[0]}>
-                              {row.map((cell, ci) => (
-                                <td key={ci}>
-                                  {ci === 0 ? <b>{cell}</b> : cell}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {isRefs && (
-                    <div className="refs-columns">
-                      {referencesList.map((r) => (
-                        <div className="ref-item" key={r.id}>
-                          <span className="ref-idx">{r.id}</span>
-                          <a
-                            href={r.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {r.title}
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Баруун тал: зураг, карт эсвэл зарчмын хавтан */}
-                {hasVisual && (
-                  <div className="visual-side">
-                    {s.imageSrc ? (
-                      <div className="photo-frame">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={s.imageSrc}
-                          alt={s.imageAlt ?? "Слайдын зураг"}
-                          loading="lazy"
-                        />
-                        {s.imageBadge && (
-                          <div className="photo-badge">{s.imageBadge}</div>
-                        )}
-                        {s.imageSource && (
-                          <div className="photo-source">{s.imageSource}</div>
-                        )}
-                      </div>
-                    ) : s.cards ? (
-                      <div className="paper-card-stack">
-                        {s.cards.map((c) => (
-                          <div
-                            className="paper-card"
-                            key={c.title}
-                            style={
-                              toneColor(c.tone)
-                                ? { borderLeftColor: toneColor(c.tone) }
-                                : undefined
-                            }
-                          >
-                            <div className="card-top">
-                              <span className="card-title">{c.title}</span>
-                              {c.pill && (
-                                <span className="card-pill">{c.pill}</span>
-                              )}
-                            </div>
-                            {c.desc && <p className="card-desc">{c.desc}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    ) : s.tiles ? (
-                      <div className="principle-grid">
-                        {s.tiles.map((name, i) => (
-                          <div className="principle-tile" key={name}>
-                            <span className="principle-num">0{i + 1}</span>
-                            <span className="principle-name">{name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            </section>
-          );
-        })}
-      </main>
-
-      {/* BOTTOM CHROME BAR */}
-      <footer className="chrome bottom">
-        <div className="counter">
-          <b>{String(index + 1).padStart(2, "0")}</b>
-          <span>/</span>
-          <span>{String(slides.length).padStart(2, "0")}</span>
-          <span style={{ marginLeft: "14px", color: "var(--ink-2)" }}>
-            {slides[index].name}
-          </span>
-        </div>
-
-        <div className="nav-buttons">
-          <button
-            onClick={() => goToSlide(index - 1)}
-            disabled={index === 0 || isBusy}
-            aria-label="Өмнөх слайд"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => goToSlide(index + 1)}
-            disabled={index === slides.length - 1 || isBusy}
-            aria-label="Дараагийн слайд"
-          >
-            →
-          </button>
-          <button
-            onClick={() => {
-              if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen?.();
-              } else {
-                document.exitFullscreen?.();
-              }
-            }}
-            aria-label="Бүтэн дэлгэц"
-          >
-            {isFullscreen ? "×" : "⛶"}
-          </button>
-        </div>
-      </footer>
-    </div>
+    <DeckShell
+      deck="02"
+      names={names}
+      brandSub={brandSub}
+      poseFor={poseFor}
+      renderSlide={renderSlide}
+      pptx="/downloads/biydalt2.pptx"
+      extraCss={css}
+    />
   );
 }
