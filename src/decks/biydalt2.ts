@@ -301,7 +301,7 @@ export const slides: Slide[] = [
       {
         icon: Landmark,
         num: "1962",
-        label: "10 дугаар сарын 8-нд байгуулагдсан [1]",
+        label: "12 дугаар сарын 8-нд байгуулагдсан [1]",
       },
       { icon: Users, num: "6000+", label: "гишүүнтэй [1]" },
     ],
